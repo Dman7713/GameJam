@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class DriverDeathFromHead : MonoBehaviour
 {
-    [SerializeField] private Transform bikeRoot; // Parent of bike parts
+    [SerializeField] private Transform bikeRoot;
     [SerializeField] private LayerMask groundLayer;
 
     [Header("Optional - Manual joints to disable")]
@@ -42,30 +42,29 @@ public class DriverDeathFromHead : MonoBehaviour
             return;
         }
 
-        // Disable all joints in bikeRoot and children
-        WheelJoint2D[] wheelJoints = root.GetComponentsInChildren<WheelJoint2D>(true);
-        foreach (var wheel in wheelJoints)
+        // Disable joints in bikeRoot and children
+        foreach (WheelJoint2D wheel in root.GetComponentsInChildren<WheelJoint2D>(true))
         {
             wheel.enabled = false;
         }
 
-        HingeJoint2D[] hingeJoints = root.GetComponentsInChildren<HingeJoint2D>(true);
-        foreach (var hinge in hingeJoints)
+        foreach (HingeJoint2D hinge in root.GetComponentsInChildren<HingeJoint2D>(true))
         {
             hinge.enabled = false;
         }
 
-        // Disable manually assigned joints from inspector
+        // Disable manually assigned joints
         foreach (var hinge in hingeJointsToDisable)
         {
             if (hinge != null) hinge.enabled = false;
         }
+
         foreach (var wheel in wheelJointsToDisable)
         {
             if (wheel != null) wheel.enabled = false;
         }
 
-        // Unparent and enable physics on children
+        // Unparent and ensure Rigidbody2D is added and active
         List<Transform> children = new List<Transform>();
         foreach (Transform child in root)
         {
@@ -74,14 +73,17 @@ public class DriverDeathFromHead : MonoBehaviour
 
         foreach (Transform child in children)
         {
-            child.SetParent(null);
+            child.SetParent(null); // Detach from parent
 
+            // Add Rigidbody2D if missing
             Rigidbody2D rb = child.GetComponent<Rigidbody2D>();
-            if (rb != null)
+            if (rb == null)
             {
-                rb.bodyType = RigidbodyType2D.Dynamic;
-                rb.simulated = true;
+                rb = child.gameObject.AddComponent<Rigidbody2D>();
             }
+
+            rb.bodyType = RigidbodyType2D.Dynamic;
+            rb.simulated = true;
         }
     }
 }
