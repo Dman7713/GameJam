@@ -471,7 +471,7 @@ Transform:
   m_GameObject: {fileID: 1077609246}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.42, y: 3.6200001, z: 0}
+  m_LocalPosition: {x: 2.06, y: 3.6200001, z: 0}
   m_LocalScale: {x: 11.018994, y: 11.018994, z: 11.018994}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -491,7 +491,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   parallaxFactor: 0.35
   isLoopingHorizontal: 1
-  pixelOverlap: 20
+  pixelOverlap: 5
+  numLoopingCopies: 3
 --- !u!1 &1185506159
 GameObject:
   m_ObjectHideFlags: 0
@@ -574,7 +575,7 @@ Transform:
   m_GameObject: {fileID: 1185506159}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.55, y: 4.9300003, z: 0}
+  m_LocalPosition: {x: 0.95, y: 4.9300003, z: 0}
   m_LocalScale: {x: 11.328256, y: 11.328256, z: 11.328256}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -594,7 +595,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   parallaxFactor: 0.2
   isLoopingHorizontal: 1
-  pixelOverlap: 20
+  pixelOverlap: 5
+  numLoopingCopies: 3
 --- !u!1 &1337959964
 GameObject:
   m_ObjectHideFlags: 0
@@ -1697,7 +1699,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1670913562}
   - component: {fileID: 1670913563}
-  - component: {fileID: 1670913564}
   m_Layer: 0
   m_Name: Sky
   m_TagString: Untagged
@@ -1775,21 +1776,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &1670913564
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1670913561}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7eb9a6ee6327f7d4485c7c2389b82a15, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parallaxFactor: 0
-  isLoopingHorizontal: 0
-  pixelOverlap: 0
 --- !u!1 &1774075149
 GameObject:
   m_ObjectHideFlags: 0
@@ -2107,7 +2093,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   parallaxFactor: 0.6
   isLoopingHorizontal: 1
-  pixelOverlap: 20
+  pixelOverlap: 5
+  numLoopingCopies: 3
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

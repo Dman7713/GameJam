@@ -1,9 +1,11 @@
 using UnityEngine;
+using System.Collections.Generic; // Required for List
 
 /// <summary>
 /// This script handles parallax scrolling for a background layer.
-/// Attach it to any GameObject that should move with the camera,
+/// Attach it to ONE GameObject per parallax layer that should move with the camera,
 /// but at a different speed to create a sense of depth.
+/// It will automatically create and manage additional copies for seamless horizontal looping.
 /// </summary>
 public class ParallaxLayer : MonoBehaviour
 {
@@ -24,133 +26,183 @@ public class ParallaxLayer : MonoBehaviour
              "For pixel art, this is typically 1 divided by your Pixels Per Unit (PPU) setting, " +
              "or significantly more if gaps are still visible due to rendering precision or desired visual effect.")]
     [Range(0f, 20f)] // Increased range to allow for much more aggressive overlap
-    public float pixelOverlap = 20f; // New default value set to 20f
+    public float pixelOverlap = 0.0625f; // Default to 1 pixel overlap for 16 PPU (1/16)
+
+    [SerializeField]
+    [Tooltip("Number of copies of this sprite to maintain for seamless looping. " +
+             "Typically 3 (original + 2 copies) is sufficient to cover the screen.")]
+    [Range(2, 5)] // Allow 2 to 5 copies
+    public int numLoopingCopies = 3; // Default to 3 copies for robust looping
 
     private Transform cameraTransform;
-    private Vector3 lastCameraPosition; // Stores the camera's position from the previous frame
+    private float initialCameraX; // Stores the camera's X position at Start
+    private float initialLayerX;  // Stores the original layer's X position at Start
 
-    // Variables for two-sprite looping
     private float spriteWidth; // The width of the sprite in world units
-    private GameObject otherSpriteInstance; // Reference to the other sprite instance for looping
 
-    // Flag to prevent the twin from creating another twin
-    private bool isTwinInstance = false;
+    // List to hold all instances (original + copies) managed by this script.
+    private List<GameObject> loopingInstances = new List<GameObject>();
+
+    // Flag to ensure only the original GameObject creates and manages the copies.
+    private bool isOriginalManager = true;
 
     void Awake()
     {
-        // Check if this instance was created by another ParallaxLayer script
-        // This is a simple way to identify the twin and prevent it from re-initializing the loop
+        // If this GameObject was dynamically created by another ParallaxLayer script,
+        // it's a copy and should not act as the manager.
         if (gameObject.name.Contains("_LoopInstance"))
         {
-            isTwinInstance = true;
+            isOriginalManager = false;
         }
     }
 
     void Start()
     {
         cameraTransform = Camera.main.transform;
-        lastCameraPosition = cameraTransform.position; // Initialize lastCameraPosition here
+        initialCameraX = cameraTransform.position.x; // Store initial camera X for parallax calculation
+        initialLayerX = transform.position.x;        // Store initial layer X for relative positioning
 
-        // Only the original instance should create the twin, and only if it hasn't been created yet.
-        if (isLoopingHorizontal && !isTwinInstance && otherSpriteInstance == null)
+        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null && spriteRenderer.sprite != null)
         {
-            SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
-            if (spriteRenderer != null && spriteRenderer.sprite != null)
-            {
-                spriteWidth = spriteRenderer.bounds.size.x;
-
-                // Create the second instance of this sprite
-                otherSpriteInstance = new GameObject(gameObject.name + "_LoopInstance");
-                SpriteRenderer otherSpriteRenderer = otherSpriteInstance.AddComponent<SpriteRenderer>();
-                otherSpriteRenderer.sprite = spriteRenderer.sprite;
-                otherSpriteRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
-                otherSpriteRenderer.sortingOrder = spriteRenderer.sortingOrder;
-                otherSpriteRenderer.flipX = spriteRenderer.flipX; // Copy flip state
-                otherSpriteRenderer.flipY = spriteRenderer.flipY; // Copy flip state
-                otherSpriteRenderer.color = spriteRenderer.color; // Copy color/alpha
-
-                // Position the second instance immediately next to the first, with overlap
-                otherSpriteInstance.transform.position = new Vector3(transform.position.x + spriteWidth - pixelOverlap, transform.position.y, transform.position.z);
-                otherSpriteInstance.transform.parent = transform.parent; // Keep same parent for organization
-                otherSpriteInstance.transform.localScale = transform.localScale; // Ensure scale is copied
-
-                // Debug.Log($"Created twin for {gameObject.name}: {otherSpriteInstance.name}"); // For debugging
-            }
-            else
-            {
-                Debug.LogWarning("ParallaxLayer: isLoopingHorizontal is true but no SpriteRenderer or sprite found on " + gameObject.name + ". Disabling looping for this instance.");
-                isLoopingHorizontal = false; // Disable looping if no sprite is found
-            }
+            spriteWidth = spriteRenderer.bounds.size.x;
         }
-        else if (isTwinInstance)
+        else
         {
-            // If this is a twin, it doesn't need to do anything in Start()
-            // Its position will be managed by the original instance.
-            // Debug.Log($"Twin instance {gameObject.name} initialized."); // For debugging
+            // If no sprite, set a default width to prevent division by zero in LateUpdate
+            spriteWidth = 1f; 
+            Debug.LogWarning("ParallaxLayer: No SpriteRenderer or sprite found on " + gameObject.name + ". Using default spriteWidth of 1 for parallax calculations.");
+        }
+
+        // Only the original manager instance should create and manage the copies.
+        if (isLoopingHorizontal && isOriginalManager)
+        {
+            // Add the original GameObject to the list of instances.
+            loopingInstances.Add(gameObject);
+
+            // Create the additional copies and position them.
+            for (int i = 1; i < numLoopingCopies; i++)
+            {
+                GameObject newInstance = new GameObject(gameObject.name + "_LoopInstance_" + i);
+                SpriteRenderer newSpriteRenderer = newInstance.AddComponent<SpriteRenderer>();
+                newSpriteRenderer.sprite = spriteRenderer.sprite;
+                newSpriteRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
+                newSpriteRenderer.sortingOrder = spriteRenderer.sortingOrder;
+                newSpriteRenderer.flipX = spriteRenderer.flipX;
+                newSpriteRenderer.flipY = spriteRenderer.flipY;
+                newSpriteRenderer.color = spriteRenderer.color;
+
+                // Position the new instance to the right of the previous one, with overlap.
+                // We reference the X position of the *last* instance added to the list.
+                newInstance.transform.position = new Vector3(loopingInstances[i-1].transform.position.x + spriteWidth - pixelOverlap, transform.position.y, transform.position.z);
+                newInstance.transform.parent = transform.parent; // Keep same parent for organization
+                newInstance.transform.localScale = transform.localScale; // Ensure scale is copied
+
+                loopingInstances.Add(newInstance); // Add to the list
+            }
         }
     }
 
     void LateUpdate()
     {
-        // If this is a twin instance, it's managed by the original, so it doesn't need to update itself.
-        if (isTwinInstance) return;
+        // Only the original manager instance handles the updates for all copies.
+        if (!isOriginalManager) return;
 
-        // Calculate the camera's movement delta based on its last frame position.
-        Vector3 deltaCameraMovement = cameraTransform.position - lastCameraPosition;
-        
-        // Apply parallax movement to the current object's position.
-        // This moves the object based on the camera's movement and its parallax factor.
-        transform.position += new Vector3(deltaCameraMovement.x * parallaxFactor, deltaCameraMovement.y * parallaxFactor, 0); // Only X and Y for 2D
+        // Calculate the total horizontal distance the camera has moved from its starting point.
+        float cameraTravelX = cameraTransform.position.x - initialCameraX;
 
-        // Update last camera position for the next frame's calculation.
-        lastCameraPosition = cameraTransform.position;
+        // Calculate the parallax-adjusted offset for this layer.
+        // This is the total distance this layer should have moved based on camera travel and parallax factor.
+        float parallaxOffset = cameraTravelX * parallaxFactor;
 
-        // Handle horizontal looping if enabled and the twin exists.
-        if (isLoopingHorizontal && otherSpriteInstance != null)
+        // Calculate the X position of the "base" point for the looping system.
+        // This is where the first sprite in the conceptual loop should be, relative to its initial position.
+        // Mathf.Repeat ensures this value loops within the range of a single sprite width.
+        float currentLoopX = initialLayerX + Mathf.Repeat(parallaxOffset, spriteWidth);
+
+        // Adjust the currentLoopX to account for negative parallaxOffset (moving left)
+        // Mathf.Repeat handles positive modulo, but for negative inputs, it might not behave as expected for wrapping.
+        // This ensures correct wrapping when moving left.
+        if (parallaxOffset < 0)
         {
-            // The twin sprite also needs to move with parallax, as it doesn't run its own LateUpdate.
-            // This is crucial because the twin doesn't have its own ParallaxLayer script running.
-            otherSpriteInstance.transform.position += new Vector3(deltaCameraMovement.x * parallaxFactor, deltaCameraMovement.y * parallaxFactor, 0);
+            currentLoopX -= spriteWidth; // Shift back one sprite width if moving left
+        }
+        
+        // Position the original sprite based on the calculated currentLoopX.
+        transform.position = new Vector3(currentLoopX, transform.position.y, transform.position.z);
 
-            // Determine the camera's world space edges
-            float cameraHalfWidth = Camera.main.orthographicSize * Camera.main.aspect;
-            float cameraLeftEdge = cameraTransform.position.x - cameraHalfWidth;
-            float cameraRightEdge = cameraTransform.position.x + cameraHalfWidth;
-
-            // Check if the current sprite has moved entirely off-screen to the left
-            // The condition is that the right edge of the sprite is to the left of the camera's left edge
-            if (transform.position.x + spriteWidth < cameraLeftEdge)
+        // Position all other looping instances relative to the original.
+        // This ensures they are always laid out correctly and continuously.
+        if (isLoopingHorizontal)
+        {
+            // Position subsequent sprites relative to the one before them.
+            // The original sprite (loopingInstances[0]) is already positioned.
+            for (int i = 0; i < loopingInstances.Count; i++)
             {
-                // Move this sprite to the right of the other sprite, with overlap
-                transform.position = new Vector3(otherSpriteInstance.transform.position.x + spriteWidth - pixelOverlap, transform.position.y, transform.position.z);
+                // Ensure the current instance is valid before accessing its transform.
+                if (loopingInstances[i] == null) continue;
+
+                // For the first instance (i=0), its position is already set above.
+                // For subsequent instances, position them relative to the one before.
+                if (i > 0)
+                {
+                    loopingInstances[i].transform.position = new Vector3(
+                        loopingInstances[i-1].transform.position.x + spriteWidth - pixelOverlap,
+                        loopingInstances[i-1].transform.position.y,
+                        loopingInstances[i-1].transform.position.z
+                    );
+                }
             }
-            // Check if the current sprite has moved entirely off-screen to the right
-            // The condition is that the left edge of the sprite is to the right of the camera's right edge
-            else if (transform.position.x > cameraRightEdge) // This condition was previously `cameraRightEdge + spriteWidth`, which was too far
+
+            // Now, handle the "wrapping" of the entire set of sprites.
+            // When the leftmost sprite moves entirely off-screen to the left,
+            // move it to the right of the rightmost sprite.
+            // We need to find the current leftmost and rightmost sprites.
+            // Sorting ensures we always have the correct order.
+            loopingInstances.Sort((a, b) => a.transform.position.x.CompareTo(b.transform.position.x));
+
+            GameObject currentLeftmost = loopingInstances[0];
+            GameObject currentRightmost = loopingInstances[loopingInstances.Count - 1];
+
+            // Define a proactive repositioning threshold based on the camera's view.
+            // We want to reposition when the leftmost sprite is about to leave the camera's view (on the left).
+            // This ensures the next sprite is already visible.
+            float cameraViewLeft = cameraTransform.position.x - (Camera.main.orthographicSize * Camera.main.aspect);
+            float cameraViewRight = cameraTransform.position.x + (Camera.main.orthographicSize * Camera.main.aspect);
+
+            // If the leftmost sprite's right edge is behind the camera's left edge (plus a small buffer)
+            // This condition determines when to move the leftmost sprite to the right.
+            // The buffer ensures it moves before it's fully visible at the edge.
+            if (currentLeftmost.transform.position.x + spriteWidth < cameraViewLeft)
             {
-                // Move this sprite to the left of the other sprite, with overlap
-                transform.position = new Vector3(otherSpriteInstance.transform.position.x - spriteWidth + pixelOverlap, transform.position.y, transform.position.z);
+                currentLeftmost.transform.position = new Vector3(currentRightmost.transform.position.x + spriteWidth - pixelOverlap, currentLeftmost.transform.position.y, currentLeftmost.transform.position.z);
+                // No need to re-sort immediately here, as the next frame's loop will sort again.
+            }
+            // If the rightmost sprite's left edge is ahead of the camera's right edge (plus a small buffer)
+            // This handles moving left and determines when to move the rightmost sprite to the left.
+            else if (currentRightmost.transform.position.x > cameraViewRight)
+            {
+                currentRightmost.transform.position = new Vector3(currentLeftmost.transform.position.x - spriteWidth + pixelOverlap, currentRightmost.transform.position.y, currentRightmost.transform.position.z);
+                // No need to re-sort immediately here, as the next frame's loop will sort again.
             }
         }
     }
 
     void OnDestroy()
     {
-        // Clean up the dynamically created twin instance when the original is destroyed
-        // Ensure this only happens for the original instance managing the twin
-        if (isLoopingHorizontal && !isTwinInstance && otherSpriteInstance != null)
+        // Only the original manager instance should clean up the copies.
+        if (isOriginalManager && isLoopingHorizontal)
         {
-            // Check if the other instance is still active in the scene before destroying
-            if (otherSpriteInstance.activeInHierarchy)
+            foreach (GameObject instance in loopingInstances)
             {
-                // To prevent issues if the twin tries to destroy its non-existent 'otherSpriteInstance'
-                // when the original is being destroyed.
-                // This script is generic and should not have a ParallaxLayer component on the twin.
-                // So, we just destroy the GameObject directly.
-                Destroy(otherSpriteInstance);
+                // Destroy all instances except the one this script is on,
+                // as Unity handles the destruction of the GameObject itself.
+                if (instance != gameObject && instance != null) 
+                {
+                    Destroy(instance);
+                }
             }
+            loopingInstances.Clear(); // Clear the list after destruction
         }
-        // Note: The Material cleanup for PixelFogController is handled in PixelFogController.cs
-        // This ParallaxLayer script is generic and should not handle material specific cleanup.
     }
 }
