@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: af7181f404f1447c0a7a17b3070b952b, type: 3}
-  m_Name: Ground
+  m_Name: GroundShape
   m_EditorClassIdentifier: 
   m_Angles:
-  - m_Start: -180
-    m_End: 180
+  - m_Start: -64
+    m_End: 64
     m_Order: 0
     m_Sprites:
-    - {fileID: -1553856777573189181, guid: 7b36ddaf5b0491c41afabd4cdf6be0d0, type: 3}
+    - {fileID: 3073217513915916662, guid: 7f07e917042963e44990f74b3e60ac4b, type: 3}
   m_FillTexture: {fileID: 2800000, guid: 46ed18586e4375a4da3e77c3690642fe, type: 3}
   m_CornerSprites:
   - m_CornerType: 0
