@@ -1,5 +1,5 @@
 using UnityEngine;
-using System.Collections.Generic; // Required for List
+using System.Collections.Generic;
 
 /// <summary>
 /// This script handles parallax scrolling for a background layer.
@@ -9,200 +9,269 @@ using System.Collections.Generic; // Required for List
 /// </summary>
 public class ParallaxLayer : MonoBehaviour
 {
+    [Header("Parallax Settings")]
     [SerializeField]
     [Tooltip("Determines how much this layer moves relative to the camera. " +
              "0 = no movement (fixed in world space). " +
              "1 = moves exactly with the camera (like foreground elements). " +
              "Values between 0 and 1 create the parallax effect (further layers move less).")]
-    [Range(0f, 1f)] // Restrict parallax factor between 0 and 1 for intuitive control
-    public float parallaxFactor;
+    [Range(0f, 1f)]
+    public float parallaxFactor = 0.5f;
 
+    [Header("Looping Settings")]
     [SerializeField]
     [Tooltip("Set this to true if this layer should loop horizontally (e.g., for continuous backgrounds).")]
     public bool isLoopingHorizontal = false;
 
     [SerializeField]
-    [Tooltip("Amount of overlap (in world units) between looping sprites to prevent gaps. " +
-             "For pixel art, this is typically 1 divided by your Pixels Per Unit (PPU) setting, " +
-             "or significantly more if gaps are still visible due to rendering precision or desired visual effect.")]
-    [Range(0f, 20f)] // Increased range to allow for much more aggressive overlap
-    public float pixelOverlap = 0.0625f; // Default to 1 pixel overlap for 16 PPU (1/16)
+    [Tooltip("Amount of overlap (in world units) between looping sprites. " +
+             "A positive value makes sprites overlap (closer together), " +
+             "a negative value creates a gap (further apart).")]
+    [Range(-20f, 20f)]
+    public float overlapAmount = 20f;
 
     [SerializeField]
-    [Tooltip("Number of copies of this sprite to maintain for seamless looping. " +
-             "Typically 3 (original + 2 copies) is sufficient to cover the screen.")]
-    [Range(2, 5)] // Allow 2 to 5 copies
-    public int numLoopingCopies = 3; // Default to 3 copies for robust looping
+    [Tooltip("How far ahead (in world units) of the camera's right edge the last sprite should be initially spawned. " +
+             "This ensures the player never sees sprites pop into existence.")]
+    [Range(0f, 100f)] // Increased range to allow for higher values
+    private float spawnAheadDistance = 40f; // <--- Changed default to 40f!
 
     private Transform cameraTransform;
-    private float initialCameraX; // Stores the camera's X position at Start
-    private float initialLayerX;  // Stores the original layer's X position at Start
-
     private float spriteWidth; // The width of the sprite in world units
 
-    // List to hold all instances (original + copies) managed by this script.
-    private List<GameObject> loopingInstances = new List<GameObject>();
+    // A list to manage all sprite instances that form this looping layer
+    private List<GameObject> spriteInstances = new List<GameObject>();
 
-    // Flag to ensure only the original GameObject creates and manages the copies.
-    private bool isOriginalManager = true;
-
-    void Awake()
-    {
-        // If this GameObject was dynamically created by another ParallaxLayer script,
-        // it's a copy and should not act as the manager.
-        if (gameObject.name.Contains("_LoopInstance"))
-        {
-            isOriginalManager = false;
-        }
-    }
+    // We store the camera's previous X position to calculate its movement delta
+    private float lastCameraX;
 
     void Start()
     {
         cameraTransform = Camera.main.transform;
-        initialCameraX = cameraTransform.position.x; // Store initial camera X for parallax calculation
-        initialLayerX = transform.position.x;        // Store initial layer X for relative positioning
-
-        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
-        if (spriteRenderer != null && spriteRenderer.sprite != null)
+        if (cameraTransform == null)
         {
-            spriteWidth = spriteRenderer.bounds.size.x;
+            Debug.LogError("ParallaxLayer: Main Camera not found! Please ensure your camera is tagged 'MainCamera'.");
+            enabled = false; // Disable the script if no camera is found
+            return;
+        }
+
+        SpriteRenderer originalSpriteRenderer = GetComponent<SpriteRenderer>();
+        if (originalSpriteRenderer == null || originalSpriteRenderer.sprite == null)
+        {
+            Debug.LogError("ParallaxLayer: No SpriteRenderer or sprite found on " + gameObject.name + ". This script requires a sprite to calculate its size for looping.");
+            enabled = false;
+            return;
+        }
+
+        spriteWidth = originalSpriteRenderer.bounds.size.x;
+        if (spriteWidth <= 0)
+        {
+            Debug.LogError("ParallaxLayer: Sprite width is zero. Cannot perform parallax. Is the sprite imported correctly and visible? (Bounds.size.x: " + spriteWidth + ")");
+            enabled = false;
+            return;
+        }
+
+        Debug.Log("ParallaxLayer on " + gameObject.name + ": Sprite Width = " + spriteWidth);
+        Debug.Log("ParallaxLayer on " + gameObject.name + ": Overlap Amount = " + overlapAmount);
+
+        lastCameraX = cameraTransform.position.x;
+
+        // Initialize sprite instances only if looping is enabled
+        if (isLoopingHorizontal)
+        {
+            InitializeLoopingSprites(originalSpriteRenderer);
         }
         else
         {
-            // If no sprite, set a default width to prevent division by zero in LateUpdate
-            spriteWidth = 1f; 
-            Debug.LogWarning("ParallaxLayer: No SpriteRenderer or sprite found on " + gameObject.name + ". Using default spriteWidth of 1 for parallax calculations.");
+            // If not looping, just add the original to the list for consistent update logic
+            spriteInstances.Add(gameObject);
         }
+    }
 
-        // Only the original manager instance should create and manage the copies.
-        if (isLoopingHorizontal && isOriginalManager)
+    /// <summary>
+    /// Initializes the original sprite and creates necessary copies for seamless looping.
+    /// This method aims to position sprites so they cover the camera's initial view
+    /// and extend sufficiently beyond it to prevent popping.
+    /// </summary>
+    /// <param name="originalSr">The SpriteRenderer of the original GameObject.</param>
+    private void InitializeLoopingSprites(SpriteRenderer originalSr)
+    {
+        // First, clear any existing instances if this method is called again (e.g. from editor scripts)
+        foreach (GameObject go in spriteInstances)
         {
-            // Add the original GameObject to the list of instances.
-            loopingInstances.Add(gameObject);
-
-            // Create the additional copies and position them.
-            for (int i = 1; i < numLoopingCopies; i++)
+            if (go != gameObject) // Don't destroy the original
             {
-                GameObject newInstance = new GameObject(gameObject.name + "_LoopInstance_" + i);
-                SpriteRenderer newSpriteRenderer = newInstance.AddComponent<SpriteRenderer>();
-                newSpriteRenderer.sprite = spriteRenderer.sprite;
-                newSpriteRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
-                newSpriteRenderer.sortingOrder = spriteRenderer.sortingOrder;
-                newSpriteRenderer.flipX = spriteRenderer.flipX;
-                newSpriteRenderer.flipY = spriteRenderer.flipY;
-                newSpriteRenderer.color = spriteRenderer.color;
-
-                // Position the new instance to the right of the previous one, with overlap.
-                // We reference the X position of the *last* instance added to the list.
-                newInstance.transform.position = new Vector3(loopingInstances[i-1].transform.position.x + spriteWidth - pixelOverlap, transform.position.y, transform.position.z);
-                newInstance.transform.parent = transform.parent; // Keep same parent for organization
-                newInstance.transform.localScale = transform.localScale; // Ensure scale is copied
-
-                loopingInstances.Add(newInstance); // Add to the list
+                Destroy(go);
             }
+        }
+        spriteInstances.Clear();
+
+        // Add the original sprite to the list
+        spriteInstances.Add(gameObject);
+
+        // --- IMPORTANT: Safety check for effective segment width ---
+        // This is the actual width a single sprite occupies when considering overlap.
+        float effectiveSegmentWidth = spriteWidth - overlapAmount;
+        if (effectiveSegmentWidth <= 0)
+        {
+            Debug.LogError("ParallaxLayer on " + gameObject.name + ": The 'Overlap Amount' (" + overlapAmount + ") is too large, making the effective segment width (" + effectiveSegmentWidth + ") zero or negative. " +
+                           "This will cause division by zero or incorrect positioning. Please reduce 'Overlap Amount' or increase your sprite's actual width. Disabling script.");
+            enabled = false;
+            return;
+        }
+        Debug.Log("ParallaxLayer on " + gameObject.name + ": Effective Segment Width = " + effectiveSegmentWidth);
+
+
+        // Calculate the camera's visible width in world units
+        float cameraHalfWidth = Camera.main.orthographicSize * Camera.main.aspect;
+        float cameraVisibleWidth = cameraHalfWidth * 2;
+
+        // Determine how many sprites are needed to cover the screen plus a buffer
+        // We need enough sprites to cover from 'cameraViewLeft' to 'cameraViewRight + spawnAheadDistance'
+        float requiredTotalWidth = cameraVisibleWidth + spawnAheadDistance * 2; // Extra buffer for left and right
+
+        // We want to ensure at least 3 sprites for smooth looping (current, left, right)
+        // Adjust the number of copies based on the calculated required width
+        int minCopiesNeeded = Mathf.CeilToInt(requiredTotalWidth / effectiveSegmentWidth);
+        if (minCopiesNeeded < 3) minCopiesNeeded = 3; // Ensure at least 3 for robust looping
+
+        // Initial horizontal position for the first sprite relative to the camera
+        // We want the original sprite to be roughly centered or strategically placed
+        // The most robust way is to make sure the "total scene" covered by the sprites
+        // starts well before the camera's left edge.
+        float startX = cameraTransform.position.x - cameraHalfWidth - (minCopiesNeeded / 2.0f) * effectiveSegmentWidth;
+
+        // Position the original sprite (this GameObject)
+        // We calculate its position based on the calculated startX
+        // and then adjust for parallax in LateUpdate.
+        transform.position = new Vector3(startX, transform.position.y, transform.position.z);
+
+
+        // Create and position copies
+        for (int i = 0; i < minCopiesNeeded - 1; i++) // Create 'minCopiesNeeded - 1' copies (since original is one)
+        {
+            GameObject newInstance = new GameObject(gameObject.name + "_LoopInstance_" + (i + 1));
+            SpriteRenderer newSr = newInstance.AddComponent<SpriteRenderer>();
+            newSr.sprite = originalSr.sprite;
+            newSr.sortingLayerID = originalSr.sortingLayerID;
+            newSr.sortingOrder = originalSr.sortingOrder;
+            newSr.flipX = originalSr.flipX;
+            newSr.flipY = originalSr.flipY;
+            newSr.color = originalSr.color;
+
+            // Position the new instance to the right of the last one added
+            // The first new instance will be to the right of the original.
+            Vector3 lastInstancePos = spriteInstances[spriteInstances.Count - 1].transform.position;
+            newInstance.transform.position = new Vector3(lastInstancePos.x + effectiveSegmentWidth, transform.position.y, transform.position.z);
+            newInstance.transform.parent = transform.parent; // Keep same parent for organization
+            newInstance.transform.localScale = transform.localScale; // Ensure scale is copied
+
+            spriteInstances.Add(newInstance);
         }
     }
 
     void LateUpdate()
     {
-        // Only the original manager instance handles the updates for all copies.
-        if (!isOriginalManager) return;
+        // If the script was disabled due to an error during initialization, stop here.
+        if (!enabled) return;
 
-        // Calculate the total horizontal distance the camera has moved from its starting point.
-        float cameraTravelX = cameraTransform.position.x - initialCameraX;
+        // Calculate camera movement delta X since last frame
+        float cameraDeltaX = cameraTransform.position.x - lastCameraX;
 
-        // Calculate the parallax-adjusted offset for this layer.
-        // This is the total distance this layer should have moved based on camera travel and parallax factor.
-        float parallaxOffset = cameraTravelX * parallaxFactor;
+        // Calculate how much this parallax layer should move
+        float layerMoveAmountX = cameraDeltaX * parallaxFactor;
 
-        // Calculate the X position of the "base" point for the looping system.
-        // This is where the first sprite in the conceptual loop should be, relative to its initial position.
-        // Mathf.Repeat ensures this value loops within the range of a single sprite width.
-        float currentLoopX = initialLayerX + Mathf.Repeat(parallaxOffset, spriteWidth);
-
-        // Adjust the currentLoopX to account for negative parallaxOffset (moving left)
-        // Mathf.Repeat handles positive modulo, but for negative inputs, it might not behave as expected for wrapping.
-        // This ensures correct wrapping when moving left.
-        if (parallaxOffset < 0)
+        // Apply movement to all instances
+        foreach (GameObject instance in spriteInstances)
         {
-            currentLoopX -= spriteWidth; // Shift back one sprite width if moving left
+            if (instance != null) // Check for null in case an instance was destroyed externally
+            {
+                instance.transform.position += new Vector3(layerMoveAmountX, 0, 0);
+            }
         }
-        
-        // Position the original sprite based on the calculated currentLoopX.
-        transform.position = new Vector3(currentLoopX, transform.position.y, transform.position.z);
 
-        // Position all other looping instances relative to the original.
-        // This ensures they are always laid out correctly and continuously.
+        lastCameraX = cameraTransform.position.x; // Update lastCameraX for next frame
+
+        // Handle looping only if enabled
         if (isLoopingHorizontal)
         {
-            // Position subsequent sprites relative to the one before them.
-            // The original sprite (loopingInstances[0]) is already positioned.
-            for (int i = 0; i < loopingInstances.Count; i++)
-            {
-                // Ensure the current instance is valid before accessing its transform.
-                if (loopingInstances[i] == null) continue;
-
-                // For the first instance (i=0), its position is already set above.
-                // For subsequent instances, position them relative to the one before.
-                if (i > 0)
-                {
-                    loopingInstances[i].transform.position = new Vector3(
-                        loopingInstances[i-1].transform.position.x + spriteWidth - pixelOverlap,
-                        loopingInstances[i-1].transform.position.y,
-                        loopingInstances[i-1].transform.position.z
-                    );
-                }
-            }
-
-            // Now, handle the "wrapping" of the entire set of sprites.
-            // When the leftmost sprite moves entirely off-screen to the left,
-            // move it to the right of the rightmost sprite.
-            // We need to find the current leftmost and rightmost sprites.
-            // Sorting ensures we always have the correct order.
-            loopingInstances.Sort((a, b) => a.transform.position.x.CompareTo(b.transform.position.x));
-
-            GameObject currentLeftmost = loopingInstances[0];
-            GameObject currentRightmost = loopingInstances[loopingInstances.Count - 1];
-
-            // Define a proactive repositioning threshold based on the camera's view.
-            // We want to reposition when the leftmost sprite is about to leave the camera's view (on the left).
-            // This ensures the next sprite is already visible.
+            // Get current camera view boundaries
             float cameraViewLeft = cameraTransform.position.x - (Camera.main.orthographicSize * Camera.main.aspect);
             float cameraViewRight = cameraTransform.position.x + (Camera.main.orthographicSize * Camera.main.aspect);
 
-            // If the leftmost sprite's right edge is behind the camera's left edge (plus a small buffer)
-            // This condition determines when to move the leftmost sprite to the right.
-            // The buffer ensures it moves before it's fully visible at the edge.
-            if (currentLeftmost.transform.position.x + spriteWidth < cameraViewLeft)
+            // Recalculate effective segment width and total strip width (though it should be constant)
+            // This is done to ensure the check below is consistent.
+            float effectiveSegmentWidth = spriteWidth - overlapAmount;
+            if (effectiveSegmentWidth <= 0) // Should have been caught in Start, but as a safeguard
             {
-                currentLeftmost.transform.position = new Vector3(currentRightmost.transform.position.x + spriteWidth - pixelOverlap, currentLeftmost.transform.position.y, currentLeftmost.transform.position.z);
-                // No need to re-sort immediately here, as the next frame's loop will sort again.
+                // This shouldn't happen if Start() worked correctly.
+                // If it does, it indicates a dynamic change or an edge case.
+                enabled = false;
+                Debug.LogError("ParallaxLayer on " + gameObject.name + ": Effective Segment Width became zero or negative during LateUpdate. Disabling script.");
+                return;
             }
-            // If the rightmost sprite's left edge is ahead of the camera's right edge (plus a small buffer)
-            // This handles moving left and determines when to move the rightmost sprite to the left.
-            else if (currentRightmost.transform.position.x > cameraViewRight)
+            float totalStripWidth = effectiveSegmentWidth * spriteInstances.Count;
+
+
+            // Loop through all instances to check for repositioning
+            for (int i = 0; i < spriteInstances.Count; i++)
             {
-                currentRightmost.transform.position = new Vector3(currentLeftmost.transform.position.x - spriteWidth + pixelOverlap, currentRightmost.transform.position.y, currentRightmost.transform.position.z);
-                // No need to re-sort immediately here, as the next frame's loop will sort again.
+                GameObject currentSprite = spriteInstances[i];
+                if (currentSprite == null) continue; // Skip if somehow null
+
+                // Reposition logic:
+                // If a sprite's right edge is behind the camera's left edge (plus a small buffer)
+                // then move it to the right of the entire parallax strip.
+                if (currentSprite.transform.position.x + spriteWidth < cameraViewLeft)
+                {
+                    currentSprite.transform.position = new Vector3(currentSprite.transform.position.x + totalStripWidth, currentSprite.transform.position.y, currentSprite.transform.position.z);
+                }
+                // If a sprite's left edge is beyond the camera's right edge (plus a small buffer)
+                // when moving left, move it to the left of the entire parallax strip.
+                else if (currentSprite.transform.position.x > cameraViewRight + spawnAheadDistance)
+                {
+                    currentSprite.transform.position = new Vector3(currentSprite.transform.position.x - totalStripWidth, currentSprite.transform.position.y, currentSprite.transform.position.z);
+                }
             }
         }
     }
 
     void OnDestroy()
     {
-        // Only the original manager instance should clean up the copies.
-        if (isOriginalManager && isLoopingHorizontal)
+        // Clean up all dynamically created instances when the original GameObject is destroyed
+        foreach (GameObject instance in spriteInstances)
         {
-            foreach (GameObject instance in loopingInstances)
+            // Only destroy if it's not the original GameObject this script is attached to,
+            // and if it hasn't been destroyed by Unity already.
+            if (instance != gameObject && instance != null)
             {
-                // Destroy all instances except the one this script is on,
-                // as Unity handles the destruction of the GameObject itself.
-                if (instance != gameObject && instance != null) 
-                {
-                    Destroy(instance);
-                }
+                Destroy(instance);
             }
-            loopingInstances.Clear(); // Clear the list after destruction
         }
+        spriteInstances.Clear();
+    }
+
+    // Optional: A way to re-initialize from the inspector for debugging
+    // You can add a button in a custom editor for this
+    public void Editor_ReinitializeParallax()
+    {
+        if (Application.isPlaying)
+        {
+            Debug.LogWarning("Cannot reinitialize in Play mode via Editor_ReinitializeParallax. Use Awake/Start for runtime setup.");
+            return;
+        }
+
+        // Clean up existing copies before re-initialization
+        foreach (GameObject go in spriteInstances)
+        {
+            if (go != gameObject)
+            {
+                DestroyImmediate(go); // Use DestroyImmediate in editor mode
+            }
+        }
+        spriteInstances.Clear();
+
+        // Call Start to re-initialize everything
+        Start();
     }
 }
