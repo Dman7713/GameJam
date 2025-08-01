@@ -117,7 +117,7 @@ public class Meteor : MonoBehaviour
         // Wait for the specified warning time
         yield return new WaitForSeconds(warningTime);
         
-        // Change the Rigidbody2D type to Dynamic so it can collide and use physics.
+        // The correct syntax for setting the body type is RigidbodyType2D.Dynamic.
         if (rb != null)
         {
             rb.bodyType = RigidbodyType2D.Dynamic;
@@ -145,13 +145,7 @@ public class Meteor : MonoBehaviour
     // OnCollisionEnter2D is now the single source of truth for all impact logic.
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // If the meteor has already landed, ignore any further collisions.
-        if (hasLanded)
-        {
-            return;
-        }
-        
-        // Check if the collision is with the player.
+        // Check for player collision first, before any other logic.
         if (collision.gameObject.CompareTag("Player"))
         {
             Debug.Log("Meteor hit player. Triggering death.");
@@ -161,13 +155,20 @@ public class Meteor : MonoBehaviour
             }
         }
 
-        // The meteor has now landed, regardless of what it hit, so execute the impact sequence.
+        // If the meteor has already landed (e.g., this is a second collision), ignore it.
+        // This must be checked after the player collision check to ensure the player is always killed.
+        if (hasLanded)
+        {
+            return;
+        }
+        
+        // The meteor has now landed, so execute the impact sequence.
         isFalling = false;
         hasLanded = true;
         
         Debug.Log("Collision detected with: " + collision.gameObject.name);
 
-        // Freeze the meteor in place by stopping its physics.
+        // The correct syntax for setting the body type is RigidbodyType2D.Kinematic.
         if (rb != null)
         {
             rb.linearVelocity = Vector2.zero;
