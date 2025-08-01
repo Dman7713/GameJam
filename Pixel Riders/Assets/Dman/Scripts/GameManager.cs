@@ -19,15 +19,9 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1f;
     }
 
-    public void GameOver()
-    {
-        _gameOverCanvas.SetActive(true);
-        Debug.Log("Game Over");
-        Time.timeScale = 0f;
-    }
-
     public void RestartGame()
     {
+        Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
