@@ -111,11 +111,9 @@ public class MapGeneration1 : MonoBehaviour {
 
         _spriteShapeController.spline.InsertPointAt(generationIndex, position);
 
-        if (generationIndex != 0) {
             _spriteShapeController.spline.SetTangentMode(generationIndex, ShapeTangentMode.Continuous);
             _spriteShapeController.spline.SetLeftTangent(generationIndex, Vector3.left * _xMultiplier * _curveSmoothness);
             _spriteShapeController.spline.SetRightTangent(generationIndex, Vector3.right * _xMultiplier * _curveSmoothness);
-        }
         _lastPos = position; // Update _lastPos for the last generated point
         _activeSplinePositions.Insert(generationIndex, position);
         _splineIndex++;
