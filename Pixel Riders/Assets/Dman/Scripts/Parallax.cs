@@ -71,9 +71,6 @@ public class ParallaxLayer : MonoBehaviour
             return;
         }
 
-        Debug.Log("ParallaxLayer on " + gameObject.name + ": Sprite Width = " + spriteWidth);
-        Debug.Log("ParallaxLayer on " + gameObject.name + ": Overlap Amount = " + overlapAmount);
-
         lastCameraX = cameraTransform.position.x;
 
         // Initialize sprite instances only if looping is enabled
