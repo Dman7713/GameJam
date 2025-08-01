@@ -53,9 +53,6 @@ public class CoinController : MonoBehaviour
     
     // A static reference to the TextMeshProUGUI object to display the coin count.
     private static TextMeshProUGUI coinText;
-
-    // A flag to ensure static variables and UI are initialized only once.
-    private static bool isInitialized = false;
     
     /// <summary>
     /// Called when the script instance is being loaded.
@@ -66,8 +63,8 @@ public class CoinController : MonoBehaviour
         // Store the coin's starting position for the hover animation.
         startPosition = transform.position;
         
-        // This block will only run once for the first coin object created in the scene.
-        if (!isInitialized)
+        // This check will run every time a new scene is loaded, ensuring the UI is found.
+        if (coinText == null)
         {
             // Find and set the UI text element.
             GameObject scoreCanvas = GameObject.Find(scoreCanvasParentName);
@@ -82,9 +79,6 @@ public class CoinController : MonoBehaviour
 
             // Load the coin count from PlayerPrefs.
             coinsCollected = PlayerPrefs.GetInt(coinPlayerPrefsKey, 0);
-
-            // Set the initialization flag.
-            isInitialized = true;
         }
         
         // Update the UI on start to show the loaded count.

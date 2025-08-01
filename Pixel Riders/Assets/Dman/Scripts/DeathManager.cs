@@ -4,12 +4,15 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine.UI;
 
-public class DriverDeathFromHead : MonoBehaviour
+public class DeathManager : MonoBehaviour
 {
+    // Make the instance of the script accessible from other scripts
+    public static DeathManager Instance;
+
     [SerializeField] private Transform bikeRoot;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private StuntCarController _stuntCarController; // Reference to the StuntCarController script
-    [SerializeField] private GameObject _scoreUIObject; // NEW: The root GameObject for the score UI
+    [SerializeField] private GameObject _scoreUIObject; // The root GameObject for the score UI
 
     [Header("Optional - Manual joints to disable")]
     [SerializeField] private List<HingeJoint2D> hingeJointsToDisable = new List<HingeJoint2D>();
@@ -23,7 +26,7 @@ public class DriverDeathFromHead : MonoBehaviour
     [Tooltip("The TextMeshProUGUI object for displaying the final score.")]
     [SerializeField] private TextMeshProUGUI _finalScoreText;
     [Tooltip("The TextMeshProUGUI object for displaying the high score.")]
-    [SerializeField] private TextMeshProUGUI _highScoreText; // NEW: High score UI text
+    [SerializeField] private TextMeshProUGUI _highScoreText;
     
     private bool hasDied = false;
 
@@ -32,6 +35,16 @@ public class DriverDeathFromHead : MonoBehaviour
 
     private void Awake()
     {
+        // Singleton pattern: ensure only one instance exists
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+        
         // Ensure the death canvas is initially disabled
         if (_deathCanvas != null)
         {
@@ -61,14 +74,21 @@ public class DriverDeathFromHead : MonoBehaviour
         if (((1 << collision.gameObject.layer) & groundLayer) != 0)
         {
             Debug.Log("Driver's head hit the ground!");
-            hasDied = true;
-            
-            // Unparent the body parts to create a ragdoll effect
-            UnparentAndEnableRagdoll(bikeRoot);
-            
-            // Start the death sequence
-            HandlePlayerDeath();
+            TriggerDeath();
         }
+    }
+    
+    public void TriggerDeath()
+    {
+        if (hasDied) return;
+
+        hasDied = true;
+        
+        // Unparent the body parts to create a ragdoll effect
+        UnparentAndEnableRagdoll(bikeRoot);
+        
+        // Start the death sequence
+        HandlePlayerDeath();
     }
     
     private void UnparentAndEnableRagdoll(Transform root)

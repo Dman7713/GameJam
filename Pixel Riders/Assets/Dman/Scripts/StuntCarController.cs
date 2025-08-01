@@ -37,6 +37,8 @@ public class StuntCarController : MonoBehaviour
     [SerializeField] private float _airTimeForStunt = 0.5f;
     [Tooltip("The time (in seconds) the player must survive after landing to be awarded points.")]
     [SerializeField] private float _landingGracePeriod = 0.75f;
+    [Tooltip("The number of points awarded per flip in a combo.")]
+    [SerializeField] private int _stuntBonusPoints = 25;
 
     // === POINT VALUES ===
     [Header("Point Values")]
@@ -59,18 +61,21 @@ public class StuntCarController : MonoBehaviour
     private float _moveInput;
     private bool _isGrounded;
     private float _airTime;
-    private float _currentRotationSinceJump;
-    private float _previousAngle;
+    private float _rotationOnJump; // The car's rotation angle when it leaves the ground
     private int _flipsCompleted;
     private bool _isTrackingStunt;
     private bool _hasCrashed;
+    private bool _isTrackingLanding;
+    private int _flipsInComboCount;
     
     // Stunt Pop-up Management
     private Coroutine _scoreAnimationCoroutine;
     private Coroutine _stuntCompletionCoroutine;
     
-    // Stunt Points
-    private int _pendingStuntPoints;
+    // Points to be awarded on successful landing
+    private int _pendingFlipPoints;
+    private int _pendingAirTimePoints;
+    private int _pendingLandingBonusPoints;
     
     // Score management
     private static int _score;
@@ -117,38 +122,36 @@ public class StuntCarController : MonoBehaviour
         // === STUNT LOGIC ===
         if (!_isGrounded && wasGrounded)
         {
-            _isTrackingStunt = true;
-            _airTime = 0f;
-            _flipsCompleted = 0;
-            _currentRotationSinceJump = 0f;
-            _pendingStuntPoints = 0;
-            _hasCrashed = false;
-            _previousAngle = _carRB.transform.eulerAngles.z;
+            if (!_isTrackingLanding)
+            {
+                _isTrackingStunt = true;
+                _airTime = 0f;
+                _flipsCompleted = 0;
+                _rotationOnJump = _carRB.rotation;
+                _flipsInComboCount = 0;
+                _pendingFlipPoints = 0;
+                _pendingAirTimePoints = 0;
+                _pendingLandingBonusPoints = 0;
+                _hasCrashed = false;
+            }
         }
 
         if (!_isGrounded && _isTrackingStunt)
         {
             _airTime += Time.fixedDeltaTime;
 
-            float currentAngle = _carRB.transform.eulerAngles.z;
-            float angleChange = currentAngle - _previousAngle;
-            
-            if (angleChange > 180f) angleChange -= 360f;
-            if (angleChange < -180f) angleChange += 360f;
-
-            _currentRotationSinceJump += angleChange;
-            _previousAngle = currentAngle;
-
-            int newFlips = Mathf.FloorToInt(Mathf.Abs(_currentRotationSinceJump) / 360f);
+            float currentRotationSinceJump = _carRB.rotation - _rotationOnJump;
+            int newFlips = Mathf.FloorToInt(Mathf.Abs(currentRotationSinceJump) / 360f);
 
             if (newFlips > _flipsCompleted)
             {
+                int flipsDetected = newFlips - _flipsCompleted;
                 _flipsCompleted = newFlips;
                 
                 string trickName;
                 int trickPoints;
                 
-                if (_currentRotationSinceJump > 0)
+                if (currentRotationSinceJump > 0)
                 {
                     trickName = "Backflip";
                     trickPoints = _backflipPoints;
@@ -159,52 +162,80 @@ public class StuntCarController : MonoBehaviour
                     trickPoints = _frontflipPoints;
                 }
                 
-                _pendingStuntPoints += trickPoints;
-                DisplayStuntFeedback($"{trickName} ({_flipsCompleted}x)", trickPoints);
+                _pendingFlipPoints += trickPoints * flipsDetected;
+                DisplayStuntFeedback($"{trickName} ({_flipsCompleted}x)", trickPoints * flipsDetected);
+                _flipsInComboCount += flipsDetected;
             }
         }
         
-        if (_isGrounded && !wasGrounded && _isTrackingStunt)
+        if (_isGrounded && !wasGrounded)
         {
-            _isTrackingStunt = false;
-
-            if (_airTime >= _airTimeForStunt)
+            if (_isTrackingStunt)
             {
-                // Calculate all landing points and add to the pending total
-                int airTimeScore = Mathf.FloorToInt(_airTime) * _airTimePointsPerSecond;
-                if (airTimeScore > 0)
-                {
-                    _pendingStuntPoints += airTimeScore;
-                    DisplayStuntFeedback("Air Time!", airTimeScore);
-                }
+                _isTrackingStunt = false;
+                _isTrackingLanding = true;
 
+                // First, check if the landing itself was a crash.
                 float landingAngle = Vector2.Angle(transform.up, hit.normal);
-                if (landingAngle <= _perfectLandingThreshold)
+                if (landingAngle > _cleanLandingThreshold)
                 {
-                    _pendingStuntPoints += _perfectLandingBonus;
-                    DisplayStuntFeedback("PERFECT LANDING!", _perfectLandingBonus);
+                    _hasCrashed = true;
                 }
-                else if (landingAngle <= _cleanLandingThreshold)
+                
+                // If it wasn't a crash, calculate and store pending points
+                if (!_hasCrashed && _airTime >= _airTimeForStunt)
                 {
-                    _pendingStuntPoints += _cleanLandingBonus;
-                    DisplayStuntFeedback("Clean Landing!", _cleanLandingBonus);
-                }
+                    int airTimeScore = Mathf.FloorToInt(_airTime) * _airTimePointsPerSecond;
+                    if (airTimeScore > 0)
+                    {
+                        _pendingAirTimePoints = airTimeScore;
+                        DisplayStuntFeedback("Air Time!", airTimeScore);
+                    }
 
-                // Start the grace period timer to award all pending points
+                    int landingBonus = 0;
+                    string landingText = "";
+
+                    if (landingAngle <= _perfectLandingThreshold)
+                    {
+                        landingBonus = _perfectLandingBonus;
+                        landingText = "PERFECT LANDING!";
+                    }
+                    else if (landingAngle <= _cleanLandingThreshold)
+                    {
+                        landingBonus = _cleanLandingBonus;
+                        landingText = "Clean Landing!";
+                    }
+                    if (landingBonus > 0)
+                    {
+                        _pendingLandingBonusPoints = landingBonus;
+                        DisplayStuntFeedback(landingText, landingBonus);
+                    }
+                }
+                // If the jump was too short or a crash happened, all points are voided
+                else 
+                {
+                     _pendingFlipPoints = 0;
+                     _pendingAirTimePoints = 0;
+                     _pendingLandingBonusPoints = 0;
+                }
+                
+                // Always start the coroutine to award points after the grace period,
+                // the coroutine will check the _hasCrashed flag.
                 if (_stuntCompletionCoroutine != null) StopCoroutine(_stuntCompletionCoroutine);
-                _stuntCompletionCoroutine = StartCoroutine(AwardStuntPointsAfterLanding());
-            }
-            else
-            {
-                // If the jump was too short, cancel any pending points.
-                _pendingStuntPoints = 0;
+                _stuntCompletionCoroutine = StartCoroutine(HandleSuccessfulLanding());
             }
         }
     }
     
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Ground") && _isTrackingStunt)
+        // This is a simplified collision handler. Stunt logic is now in FixedUpdate.
+        if (collision.gameObject.CompareTag("Ground") && _isTrackingLanding)
+        {
+            // Do nothing, we're in the grace period
+            // This prevents a clean landing from being immediately canceled.
+        }
+        else if (_isTrackingStunt)
         {
             _hasCrashed = true;
             _isTrackingStunt = false;
@@ -213,22 +244,55 @@ public class StuntCarController : MonoBehaviour
             {
                 StopCoroutine(_stuntCompletionCoroutine);
             }
-            _pendingStuntPoints = 0;
+            
+            _pendingFlipPoints = 0;
+            _pendingAirTimePoints = 0;
+            _pendingLandingBonusPoints = 0;
+            _flipsInComboCount = 0;
         }
     }
 
-    private IEnumerator AwardStuntPointsAfterLanding()
+    private IEnumerator HandleSuccessfulLanding()
     {
         yield return new WaitForSeconds(_landingGracePeriod);
 
-        if (_pendingStuntPoints > 0 && !_hasCrashed)
+        _isTrackingLanding = false;
+
+        if (!_hasCrashed)
         {
-            AddScore(_pendingStuntPoints);
-            DisplayStuntFeedback("Stunt Combo!", _pendingStuntPoints);
+            if (_pendingFlipPoints > 0) AddScore(_pendingFlipPoints);
+            if (_pendingAirTimePoints > 0) AddScore(_pendingAirTimePoints);
+            if (_pendingLandingBonusPoints > 0) AddScore(_pendingLandingBonusPoints);
+
+            if (_flipsInComboCount > 1)
+            {
+                int comboBonus = _flipsInComboCount * _stuntBonusPoints;
+                AddScore(comboBonus);
+                DisplayStuntFeedback("Stunt Combo!", comboBonus);
+            }
         }
         
-        _pendingStuntPoints = 0;
         _stuntCompletionCoroutine = null;
+    }
+    
+    public void ResetStuntState()
+    {
+        _isTrackingStunt = false;
+        _isTrackingLanding = false;
+        _airTime = 0f;
+        _flipsCompleted = 0;
+        _rotationOnJump = 0f;
+        _flipsInComboCount = 0;
+        _pendingFlipPoints = 0;
+        _pendingAirTimePoints = 0;
+        _pendingLandingBonusPoints = 0;
+        _hasCrashed = false;
+        _score = 0;
+
+        if (_scoreDisplayText != null)
+        {
+            _scoreDisplayText.text = "Score: 0";
+        }
     }
 
     private void AddScore(int pointsToAdd)
@@ -298,11 +362,15 @@ public class StuntCarController : MonoBehaviour
             {
                 textMesh.color = Color.cyan;
             }
+            else if (stuntName.Contains("Combo"))
+            {
+                textMesh.color = Color.magenta;
+            }
             else if (points > 0)
             {
                 textMesh.color = Color.white;
             }
-
+            
             StartCoroutine(AnimateStuntText(textObject, textMesh));
         }
     }
