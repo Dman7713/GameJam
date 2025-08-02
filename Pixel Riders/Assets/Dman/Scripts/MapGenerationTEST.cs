@@ -8,69 +8,66 @@ using UnityEngine.U2D;
 
 
 
-public class InfiniteMapGenerator : MonoBehaviour
+public class InfiniteMapGenerator : MonoBehaviour {
 
-{
+    [Header("SpriteShape")]
 
-    [Header("SpriteShape")]
-
-    [SerializeField] private SpriteShapeController spriteShapeController;
+    [SerializeField] private SpriteShapeController spriteShapeController;
 
 
 
-    [Header("Generation Settings")]
+    [Header("Generation Settings")]
 
-    [SerializeField] private int chunkSize = 20;
+    [SerializeField] private int chunkSize = 20;
 
-    [SerializeField] private float xSpacing = 1.5f;
+    [SerializeField] private float xSpacing = 1.5f;
 
-    [SerializeField] private float yMultiplier = 3f;
+    [SerializeField] private float yMultiplier = 3f;
 
-    [SerializeField] private float baseY = 10f;
+    [SerializeField] private float baseY = 10f;
 
-    [SerializeField] private float bottomY = 0f;
+    [SerializeField] private float bottomY = 0f;
 
-    [SerializeField] private float noiseStep = 0.2f;
+    [SerializeField] private float noiseStep = 0.2f;
 
-    [SerializeField] private int perlinSeed = 0;
-
-
-
-    [Header("Player & Spawn Settings")]
-
-    [SerializeField] private Transform player;
-
-    [SerializeField] private float spawnRadius = 40f;
-
-    [SerializeField] private int chunkDespawnBuffer = 1;
+    [SerializeField] private int perlinSeed = 0;
+    [SerializeField, Range(0f,1f)] private float curveSmoothness;
 
 
 
-    private Dictionary<int, List<Vector3>> generatedChunks = new Dictionary<int, List<Vector3>>();
+    [Header("Player & Spawn Settings")]
 
-    private HashSet<int> loadedChunkIndices = new HashSet<int>();
+    [SerializeField] private Transform player;
 
-    private List<Vector3> activePoints = new List<Vector3>();
+    [SerializeField] private float spawnRadius = 40f;
 
-
-
-    private void Start()
-
-    {
-
-        if (perlinSeed == 0)
-
-            perlinSeed = Random.Range(0, 10000);
+    [SerializeField] private int chunkDespawnBuffer = 1;
 
 
 
-        if (player == null)
+    private Dictionary<int, List<Vector3>> generatedChunks = new Dictionary<int, List<Vector3>>();
 
-            player = GameObject.FindGameObjectWithTag("Player").transform;
+    private HashSet<int> loadedChunkIndices = new HashSet<int>();
+
+    private List<Vector3> activePoints = new List<Vector3>();
 
 
 
-        spriteShapeController.spline.Clear();
+    private void Start() {
+
+        if (perlinSeed == 0)
+
+            perlinSeed = Random.Range(0, 10000);
+
+
+
+        if (player == null)
+
+            player = GameObject.FindGameObjectWithTag("Player").transform;
+
+
+
+        spriteShapeController.spline.Clear();
 
 
 
@@ -78,311 +75,225 @@ public class InfiniteMapGenerator : MonoBehaviour
 
         StartCoroutine(DelayedInitialGeneration());
 
-        StartCoroutine(ForceVisibilityFix());
+        StartCoroutine(ForceVisibilityFix());
 
-    }
+    }
 
 
 
-    private IEnumerator DelayedInitialGeneration()
+    private IEnumerator DelayedInitialGeneration() {
 
-    {
+        yield return new WaitForEndOfFrame();
 
-        yield return new WaitForEndOfFrame();
+        UpdateChunks();
 
-        UpdateChunks();
+    }
 
-    }
+    private IEnumerator ForceVisibilityFix() {
 
+        yield return new WaitForSeconds(1f);
+        UpdateChunks();
+    }
 
+    private void Update() {
+        UpdateChunks();
+    }
 
-    private IEnumerator ForceVisibilityFix()
 
-    {
 
-        yield return new WaitForSeconds(1f);
+    private void UpdateChunks() {
+        float chunkWorldSize = chunkSize * xSpacing * transform.localScale.x;
+        int playerChunk = Mathf.FloorToInt(player.position.x / chunkWorldSize);
+        HashSet<int> requiredChunks = new HashSet<int>();
 
-        UpdateChunks();
+        float loadRange = spawnRadius / chunkWorldSize;
 
-    }
+        for (int i = (int)(playerChunk - loadRange); i <= playerChunk + loadRange; i++) {
 
+            requiredChunks.Add(i);
 
+            if (!loadedChunkIndices.Contains(i)) {
 
-    private void Update()
+                LoadChunk(i);
 
-    {
+                loadedChunkIndices.Add(i);
+            }
+        }
 
-        UpdateChunks();
+        List<int> chunksToRemove = new List<int>();
 
-    }
+        foreach (int index in loadedChunkIndices) {
 
+            if (!requiredChunks.Contains(index)) {
 
+                bool isTooFarBehind = index < playerChunk - loadRange - chunkDespawnBuffer;
 
-    private void UpdateChunks()
+                bool isTooFarAhead = index > playerChunk + loadRange + chunkDespawnBuffer;
 
-    {
+                if (isTooFarBehind || isTooFarAhead) {
 
-        float chunkWorldSize = chunkSize * xSpacing * transform.localScale.x;
+                    RemoveChunk(index);
 
-        int playerChunk = Mathf.FloorToInt(player.position.x / chunkWorldSize);
+                    chunksToRemove.Add(index);
 
+                }
 
+            }
 
-        HashSet<int> requiredChunks = new HashSet<int>();
+        }
 
-        float loadRange = spawnRadius / chunkWorldSize;
 
 
+        foreach (int index in chunksToRemove) {
 
-        for (int i = (int)(playerChunk - loadRange); i <= playerChunk + loadRange; i++)
+            loadedChunkIndices.Remove(index);
 
-        {
+        }
 
-            requiredChunks.Add(i);
 
-            if (!loadedChunkIndices.Contains(i))
 
-            {
+        UpdateSplinePoints();
 
-                LoadChunk(i);
+    }
 
-                loadedChunkIndices.Add(i);
 
-            }
 
-        }
+    private void LoadChunk(int chunkIndex) {
 
+        List<Vector3> chunkPoints = GenerateChunkPoints(chunkIndex);
 
+        generatedChunks[chunkIndex] = chunkPoints;
 
-        List<int> chunksToRemove = new List<int>();
+    }
 
-        foreach (int index in loadedChunkIndices)
 
-        {
 
-            if (!requiredChunks.Contains(index))
+    private void RemoveChunk(int chunkIndex) {
 
-            {
+        if (generatedChunks.ContainsKey(chunkIndex)) {
 
-                bool isTooFarBehind = index < playerChunk - loadRange - chunkDespawnBuffer;
+            generatedChunks.Remove(chunkIndex);
 
-                bool isTooFarAhead = index > playerChunk + loadRange + chunkDespawnBuffer;
+        }
 
+    }
 
 
-                if (isTooFarBehind || isTooFarAhead)
 
-                {
+    private List<Vector3> GenerateChunkPoints(int chunkIndex) {
 
-                    RemoveChunk(index);
+        List<Vector3> topPoints = new List<Vector3>();
 
-                    chunksToRemove.Add(index);
+        int startPointIndex = chunkIndex * chunkSize;
 
-                }
 
-            }
 
-        }
+        for (int i = 0; i < chunkSize; i++) {
 
-
-
-        foreach (int index in chunksToRemove)
-
-        {
-
-            loadedChunkIndices.Remove(index);
-
-        }
-
-
-
-        UpdateSplinePoints();
-
-    }
-
-
-
-    private void LoadChunk(int chunkIndex)
-
-    {
-
-        List<Vector3> chunkPoints = GenerateChunkPoints(chunkIndex);
-
-        generatedChunks[chunkIndex] = chunkPoints;
-
-    }
-
-
-
-    private void RemoveChunk(int chunkIndex)
-
-    {
-
-        if (generatedChunks.ContainsKey(chunkIndex))
-
-        {
-
-            generatedChunks.Remove(chunkIndex);
-
-        }
-
-    }
-
-
-
-    private List<Vector3> GenerateChunkPoints(int chunkIndex)
-
-    {
-
-        List<Vector3> topPoints = new List<Vector3>();
-
-        int startPointIndex = chunkIndex * chunkSize;
-
-
-
-        for (int i = 0; i < chunkSize; i++)
-
-        {
-
-            float x = (startPointIndex + i) * xSpacing;
-
-            x += Random.Range(-0.001f, 0.001f); // Slight variation to avoid duplicates
-
-
-
+            float x = (startPointIndex + i) * xSpacing;
+            x += Random.Range(-0.001f, 0.001f); // Slight variation to avoid duplicates
             float noiseY = Mathf.PerlinNoise((startPointIndex + i) * noiseStep, perlinSeed) * yMultiplier;
 
-            float y = noiseY + baseY;
+            float y = noiseY + baseY;
 
+            topPoints.Add(new Vector3(x, y, 0));
+        }
 
 
-            topPoints.Add(new Vector3(x, y, 0));
 
-        }
+        if (generatedChunks.ContainsKey(chunkIndex - 1)) {
 
+            List<Vector3> prevChunk = generatedChunks[chunkIndex - 1];
 
+            if (prevChunk.Count >= chunkSize) {
 
-        if (generatedChunks.ContainsKey(chunkIndex - 1))
+                float lastYPrevChunk = prevChunk[chunkSize - 1].y;
 
-        {
+                Vector3 firstTop = topPoints[0];
 
-            List<Vector3> prevChunk = generatedChunks[chunkIndex - 1];
+                topPoints[0] = new Vector3(firstTop.x, lastYPrevChunk, 0);
 
-            if (prevChunk.Count >= chunkSize)
+            }
 
-            {
+        }
 
-                float lastYPrevChunk = prevChunk[chunkSize - 1].y;
 
-                Vector3 firstTop = topPoints[0];
 
-                topPoints[0] = new Vector3(firstTop.x, lastYPrevChunk, 0);
+        return topPoints;
 
-            }
+    }
 
-        }
 
 
+    private void UpdateSplinePoints() {
 
-        return topPoints;
+        activePoints.Clear();
+        List<int> sortedChunks = new List<int>(loadedChunkIndices);
+        sortedChunks.Sort();
+        List<Vector3> allTopPoints = new List<Vector3>();
+        foreach (int chunkIndex in sortedChunks) {
+            if (generatedChunks.ContainsKey(chunkIndex)) {
+                allTopPoints.AddRange(generatedChunks[chunkIndex]);
+            }
 
-    }
+        }
 
 
 
-    private void UpdateSplinePoints()
+        if (allTopPoints.Count == 0)
 
-    {
+            return;
 
-        activePoints.Clear();
 
 
+        activePoints.AddRange(allTopPoints);
 
-        List<int> sortedChunks = new List<int>(loadedChunkIndices);
 
-        sortedChunks.Sort();
 
+        for (int i = allTopPoints.Count - 1; i >= 0; i--) {
 
+            if (i != allTopPoints.Count - 1 && i > 0) { continue; }
 
-        List<Vector3> allTopPoints = new List<Vector3>();
+            Vector3 top = allTopPoints[i];
 
+            Vector3 bottom = new Vector3(top.x, bottomY, 0);
 
+            activePoints.Add(bottom);
 
-        foreach (int chunkIndex in sortedChunks)
+        }
 
-        {
 
-            if (generatedChunks.ContainsKey(chunkIndex))
 
-            {
+        var spline = spriteShapeController.spline;
 
-                allTopPoints.AddRange(generatedChunks[chunkIndex]);
+        spline.Clear();
 
-            }
 
-        }
 
+        for (int i = 0; i < activePoints.Count; i++) {
 
+            if (i == 0 || Vector3.Distance(activePoints[i], activePoints[i - 1]) > 0.01f) {
 
-        if (allTopPoints.Count == 0)
+                spline.InsertPointAt(spline.GetPointCount(), activePoints[i]);
 
-            return;
+            }
 
+        }
 
 
-        activePoints.AddRange(allTopPoints);
 
+        int totalPoints = spline.GetPointCount();
 
+        for (int i = 0; i < totalPoints; i++) {
 
-        for (int i = allTopPoints.Count - 1; i >= 0; i--)
+            spline.SetTangentMode(i, ShapeTangentMode.Continuous);
+            spline.SetLeftTangent(i, Vector3.left * curveSmoothness);
+            spline.SetRightTangent(i, Vector3.right * curveSmoothness);
+        }
 
-        {
 
-            Vector3 top = allTopPoints[i];
 
-            Vector3 bottom = new Vector3(top.x, bottomY, 0);
-
-            activePoints.Add(bottom);
-
-        }
-
-
-
-        var spline = spriteShapeController.spline;
-
-        spline.Clear();
-
-
-
-        for (int i = 0; i < activePoints.Count; i++)
-
-        {
-
-            if (i == 0 || Vector3.Distance(activePoints[i], activePoints[i - 1]) > 0.01f)
-
-            {
-
-                spline.InsertPointAt(spline.GetPointCount(), activePoints[i]);
-
-            }
-
-        }
-
-
-
-        int totalPoints = spline.GetPointCount();
-
-        for (int i = 0; i < totalPoints; i++)
-
-        {
-
-            spline.SetTangentMode(i, ShapeTangentMode.Linear);
-
-        }
-
-
-
-        spline.isOpenEnded = false;
+        spline.isOpenEnded = false;
 
 
 
@@ -390,28 +301,10 @@ public class InfiniteMapGenerator : MonoBehaviour
 
         spriteShapeController.RefreshSpriteShape();
 
-        spriteShapeController.BakeMesh();
+        spriteShapeController.BakeMesh();
 
+        Canvas.ForceUpdateCanvases();
 
-
-        // Toggle renderer visibility to force redraw
-
-        var renderer = spriteShapeController.GetComponent<Renderer>();
-
-        if (renderer != null)
-
-        {
-
-            renderer.enabled = false;
-
-            renderer.enabled = true;
-
-        }
-
-
-
-        Canvas.ForceUpdateCanvases();
-
-    }
+    }
 
 }

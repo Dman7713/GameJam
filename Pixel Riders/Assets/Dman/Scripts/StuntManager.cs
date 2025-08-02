@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Collections;
+using Unity.VisualScripting;
 
 public class StuntManager : MonoBehaviour
 {
@@ -176,9 +177,11 @@ public class StuntManager : MonoBehaviour
     void ShowComboPopup(int comboCount)
     {
         if (stuntTextPrefab == null || uiCanvas == null) return;
+
         RectTransform canvasRect = uiCanvas.GetComponent<RectTransform>();
         RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, new Vector2(Screen.width * 0.5f, Screen.height * 0.8f), null, out Vector2 localPos);
         RectTransform popup = Instantiate(stuntTextPrefab, uiCanvas.transform).GetComponent<RectTransform>();
+        if (popup.gameObject.IsDestroyed()) { return; }
         popup.localPosition = localPos;
         popup.localScale = Vector3.zero;
         popup.localRotation = Quaternion.identity;
@@ -198,6 +201,7 @@ public class StuntManager : MonoBehaviour
 
     IEnumerator AnimatePopup(RectTransform popupRect, TextMeshProUGUI text)
     {
+        
         float timer = 0f;
         while (timer < popupScaleDuration)
         {
