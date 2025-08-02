@@ -5495,7 +5495,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &559392754
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11926,7 +11926,7 @@ Transform:
   m_GameObject: {fileID: 1070850720}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 33.49, y: 124.82, z: -10}
+  m_LocalPosition: {x: 29.76, y: 137.27, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -12478,7 +12478,7 @@ Transform:
   m_GameObject: {fileID: 1337959964}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 33.49, y: 124.82, z: 0}
+  m_LocalPosition: {x: 29.76, y: 137.27, z: 0}
   m_LocalScale: {x: 3.5857136, y: 3.5857136, z: 3.5857136}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -13354,7 +13354,7 @@ HingeJoint2D:
   m_BreakAction: 3
   m_AutoConfigureConnectedAnchor: 1
   m_Anchor: {x: 0.0044738934, y: -0.11701578}
-  m_ConnectedAnchor: {x: -0.29232, y: -0.035709523}
+  m_ConnectedAnchor: {x: -0.29232, y: -0.035707396}
   m_UseConnectedAnchor: 1
   m_UseMotor: 0
   m_Motor:
@@ -13649,7 +13649,7 @@ Transform:
   m_GameObject: {fileID: 1629933319}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 33.49, y: 124.82, z: -10}
+  m_LocalPosition: {x: 29.76, y: 137.27, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -14587,7 +14587,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!68 &2051436523
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -16491,6 +16491,7 @@ SceneRoots:
   - {fileID: 711747490}
   - {fileID: 1629933322}
   - {fileID: 1337959966}
+  - {fileID: 1070850723}
   - {fileID: 788547458}
   - {fileID: 1670913562}
   - {fileID: 1778337936}
@@ -16508,4 +16509,3 @@ SceneRoots:
   - {fileID: 1170525519908766445}
   - {fileID: 8042179498032058501}
   - {fileID: 559392755}
-  - {fileID: 1070850723}
