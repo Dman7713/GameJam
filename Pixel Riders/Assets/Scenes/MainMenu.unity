@@ -330,7 +330,6 @@ MonoBehaviour:
   _deathCanvas: {fileID: 0}
   _deathText: {fileID: 0}
   _finalScoreText: {fileID: 0}
-  _highScoreText: {fileID: 1072250672}
 --- !u!233 &265286729
 HingeJoint2D:
   m_ObjectHideFlags: 0
@@ -4541,6 +4540,7 @@ GameObject:
   - component: {fileID: 1072250671}
   - component: {fileID: 1072250673}
   - component: {fileID: 1072250672}
+  - component: {fileID: 1072250674}
   m_Layer: 5
   m_Name: Highscore
   m_TagString: Untagged
@@ -4666,6 +4666,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1072250670}
   m_CullTransparentMesh: 1
+--- !u!114 &1072250674
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1072250670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8301f7b68d6be742b4f3cad5e82797f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _highScoreText: {fileID: 1072250672}
 --- !u!1 &1167577944
 GameObject:
   m_ObjectHideFlags: 0
@@ -4845,54 +4858,6 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 647.9975, y: 745.2055, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1196010790
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1196010792}
-  - component: {fileID: 1196010791}
-  m_Layer: 0
-  m_Name: MeteorSpawner
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1196010791
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1196010790}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 454ccaed67adf954088697a8a6518180, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  meteorPrefab: {fileID: 1118020191029471674, guid: 347dd3f0a50817e41b5b5e752a905aa3, type: 3}
-  playerTransform: {fileID: 603425229}
-  spawnRadius: 10
-  spawnInterval: 1
---- !u!4 &1196010792
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1196010790}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 152.51192, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5803,75 +5768,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 26ba3825867947c4c834e42803317837, type: 3}
---- !u!1001 &2146886539
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 1118020191029471674, guid: 347dd3f0a50817e41b5b5e752a905aa3, type: 3}
-      propertyPath: m_Name
-      value: Meteor
-      objectReference: {fileID: 0}
-    - target: {fileID: 5130330151170519602, guid: 347dd3f0a50817e41b5b5e752a905aa3, type: 3}
-      propertyPath: m_Color.b
-      value: 0.508989
-      objectReference: {fileID: 0}
-    - target: {fileID: 5130330151170519602, guid: 347dd3f0a50817e41b5b5e752a905aa3, type: 3}
-      propertyPath: m_Color.g
-      value: 0.508989
-      objectReference: {fileID: 0}
-    - target: {fileID: 5130330151170519602, guid: 347dd3f0a50817e41b5b5e752a905aa3, type: 3}
-      propertyPath: m_Color.r
-      value: 0.8113208
-      objectReference: {fileID: 0}
-    - target: {fileID: 6235881996129831924, guid: 347dd3f0a50817e41b5b5e752a905aa3, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -3.064271
-      objectReference: {fileID: 0}
-    - target: {fileID: 6235881996129831924, guid: 347dd3f0a50817e41b5b5e752a905aa3, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 129.21593
-      objectReference: {fileID: 0}
-    - target: {fileID: 6235881996129831924, guid: 347dd3f0a50817e41b5b5e752a905aa3, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6235881996129831924, guid: 347dd3f0a50817e41b5b5e752a905aa3, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6235881996129831924, guid: 347dd3f0a50817e41b5b5e752a905aa3, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6235881996129831924, guid: 347dd3f0a50817e41b5b5e752a905aa3, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6235881996129831924, guid: 347dd3f0a50817e41b5b5e752a905aa3, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6235881996129831924, guid: 347dd3f0a50817e41b5b5e752a905aa3, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6235881996129831924, guid: 347dd3f0a50817e41b5b5e752a905aa3, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6235881996129831924, guid: 347dd3f0a50817e41b5b5e752a905aa3, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 347dd3f0a50817e41b5b5e752a905aa3, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -5887,8 +5783,6 @@ SceneRoots:
   - {fileID: 603425229}
   - {fileID: 1190791621}
   - {fileID: 740234510}
-  - {fileID: 1196010792}
-  - {fileID: 2146886539}
   - {fileID: 1906642459}
   - {fileID: 303649420}
   - {fileID: 2026276799}

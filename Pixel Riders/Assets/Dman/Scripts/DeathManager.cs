@@ -7,18 +7,19 @@ public class DeathManager : MonoBehaviour
     public static DeathManager Instance;
 
     [SerializeField] private Transform bikeRoot;
-    [SerializeField] private Transform head; // Only unparent the head
+    [SerializeField] private Transform head; 
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private StuntManager stuntManager;
     [SerializeField] private GameObject _scoreUIObject;
-
     [SerializeField] private ParticleSystem _deathParticleEffect;
 
     [Header("Death UI")]
     [SerializeField] private GameObject _deathCanvas;
     [SerializeField] private TextMeshProUGUI _deathText;
     [SerializeField] private TextMeshProUGUI _finalScoreText;
-    [SerializeField] private TextMeshProUGUI _highScoreText;
+
+    // We no longer need the high score TextMeshPro here.
+    private HighScoreDisplay _deathHighScoreDisplay;
 
     private bool hasDied = false;
     private const string HighScoreKey = "HighScore";
@@ -38,14 +39,8 @@ public class DeathManager : MonoBehaviour
             _finalScoreText.alpha = 0f;
             _finalScoreText.transform.localScale = Vector3.zero;
         }
-
-        if (_highScoreText != null)
-        {
-            _highScoreText.alpha = 0f;
-            _highScoreText.transform.localScale = Vector3.zero;
-        }
     }
-
+    
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (hasDied) return;
@@ -111,7 +106,6 @@ public class DeathManager : MonoBehaviour
     {
         Time.timeScale = 0.3f;
 
-        // Clear stunt popups if possible
         if (stuntManager != null && stuntManager.uiCanvas != null)
         {
             foreach (Transform child in stuntManager.uiCanvas.transform)
@@ -133,29 +127,29 @@ public class DeathManager : MonoBehaviour
                 StartCoroutine(PulseText(_deathText, 0.05f, 0.5f));
             }
 
-            // The final score text pops up immediately after the death text animation is complete
             if (_finalScoreText != null)
             {
-                _finalScoreText.text = $"Score: {StuntManager.Score}";
-                StartCoroutine(AnimateDeathText(_finalScoreText, 0.5f, 0f, 1f));
-            }
-
-            // The high score text pops up after the final score text. 
-            // A delay of 0.75f (which is the animation time) makes this feel more deliberate
-            if (_highScoreText != null)
-            {
+                // Check if current score is a new high score.
                 int currentScore = StuntManager.Score;
                 int highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
 
                 if (currentScore > highScore)
                 {
-                    highScore = currentScore;
-                    PlayerPrefs.SetInt(HighScoreKey, highScore);
+                    PlayerPrefs.SetInt(HighScoreKey, currentScore);
                     PlayerPrefs.Save();
                 }
 
-                _highScoreText.text = $"High Score: {highScore}";
-                StartCoroutine(AnimateDeathText(_highScoreText, 0.75f, 0.5f, 1f));
+                _finalScoreText.text = $"Score: {currentScore}";
+                StartCoroutine(AnimateDeathText(_finalScoreText, 0.5f, 0f, 1f));
+            }
+            
+            // Now, find the HighScoreDisplay component in the scene and tell it to display the score.
+            _deathHighScoreDisplay = _deathCanvas.GetComponentInChildren<HighScoreDisplay>();
+            if (_deathHighScoreDisplay != null)
+            {
+                // We add a delay so it appears after the final score.
+                yield return new WaitForSecondsRealtime(0.75f);
+                _deathHighScoreDisplay.DisplayHighScore();
             }
         }
     }

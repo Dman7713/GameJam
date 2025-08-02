@@ -7032,7 +7032,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TrackerSettings:
     BindingMode: 4
-    PositionDamping: {x: 1.5, y: 1.5, z: 1.5}
+    PositionDamping: {x: 1, y: 1, z: 1}
     AngularDampingMode: 0
     RotationDamping: {x: 1, y: 1, z: 1}
     QuaternionDamping: 1
@@ -14071,7 +14071,6 @@ MonoBehaviour:
   _deathCanvas: {fileID: 899760659}
   _deathText: {fileID: 759007342}
   _finalScoreText: {fileID: 641969429}
-  _highScoreText: {fileID: 1969742443}
 --- !u!1 &1538455755
 GameObject:
   m_ObjectHideFlags: 0
