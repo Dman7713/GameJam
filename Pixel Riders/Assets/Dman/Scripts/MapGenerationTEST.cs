@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.U2D;
 
@@ -8,18 +8,18 @@ public class InfiniteMapGenerator : MonoBehaviour
     [SerializeField] private SpriteShapeController spriteShapeController;
 
     [Header("Generation Settings")]
-    [SerializeField] private int chunkSize = 20;                // Number of top points per chunk
-    [SerializeField] private float xSpacing = 1.5f;             // Horizontal spacing between points
-    [SerializeField] private float yMultiplier = 3f;            // Height multiplier for Perlin noise
-    [SerializeField] private float baseY = 1.5f;                // Base vertical offset for top points
-    [SerializeField] private float bottomY = 0f;                // Y for bottom points
-    [SerializeField] private float noiseStep = 0.2f;            // Step size for Perlin noise
-    [SerializeField] private int perlinSeed = 0;                // Seed for Perlin noise
+    [SerializeField] private int chunkSize = 20;
+    [SerializeField] private float xSpacing = 1.5f;
+    [SerializeField] private float yMultiplier = 3f;
+    [SerializeField] private float baseY = 1.5f;
+    [SerializeField] private float bottomY = 0f;
+    [SerializeField] private float noiseStep = 0.2f;
+    [SerializeField] private int perlinSeed = 0;
 
     [Header("Player & Spawn Settings")]
     [SerializeField] private Transform player;
-    [SerializeField] private float spawnRadius = 40f;           // Radius around player to keep chunks loaded
-    [SerializeField] private int chunkDespawnBuffer = 1;        // Extra chunks to keep loaded before despawning
+    [SerializeField] private float spawnRadius = 40f;
+    [SerializeField] private int chunkDespawnBuffer = 1;
 
     private Dictionary<int, List<Vector3>> generatedChunks = new Dictionary<int, List<Vector3>>();
     private HashSet<int> loadedChunkIndices = new HashSet<int>();
@@ -34,7 +34,6 @@ public class InfiniteMapGenerator : MonoBehaviour
             player = GameObject.FindGameObjectWithTag("Player").transform;
 
         spriteShapeController.spline.Clear();
-
         UpdateChunks();
     }
 
@@ -107,8 +106,11 @@ public class InfiniteMapGenerator : MonoBehaviour
         for (int i = 0; i < chunkSize; i++)
         {
             float x = (startPointIndex + i) * xSpacing;
+            x += Random.Range(-0.001f, 0.001f); // Slight variation to avoid duplicates
+
             float noiseY = Mathf.PerlinNoise((startPointIndex + i) * noiseStep, perlinSeed) * yMultiplier;
             float y = noiseY + baseY;
+
             topPoints.Add(new Vector3(x, y, 0));
         }
 
@@ -147,13 +149,15 @@ public class InfiniteMapGenerator : MonoBehaviour
         if (allTopPoints.Count == 0)
             return;
 
+        // Add top points
         activePoints.AddRange(allTopPoints);
 
+        // Add bottom points in reverse order to close the shape
         for (int i = allTopPoints.Count - 1; i >= 0; i--)
         {
-            if (i != allTopPoints.Count - 1 && i != 0) { continue; }
-            Vector3 bottomPoint = new Vector3(allTopPoints[i].x, bottomY, 0);
-            activePoints.Add(bottomPoint);
+            Vector3 top = allTopPoints[i];
+            Vector3 bottom = new Vector3(top.x, bottomY, 0);
+            activePoints.Add(bottom);
         }
 
         var spline = spriteShapeController.spline;
@@ -161,27 +165,26 @@ public class InfiniteMapGenerator : MonoBehaviour
 
         for (int i = 0; i < activePoints.Count; i++)
         {
-            spline.InsertPointAt(i, activePoints[i]);
-            spriteShapeController.RefreshSpriteShape();
+            // Avoid very close points
+            if (i == 0 || Vector3.Distance(activePoints[i], activePoints[i - 1]) > 0.01f)
+            {
+                spline.InsertPointAt(spline.GetPointCount(), activePoints[i]);
+            }
+            else
+            {
+                Debug.LogWarning($"Skipped point {i} due to proximity.");
+            }
         }
 
         int totalPoints = spline.GetPointCount();
 
         for (int i = 0; i < totalPoints; i++)
         {
-            if (i == 0 || i == allTopPoints.Count - 1 || i == allTopPoints.Count)
-            {
-                spline.SetTangentMode(i, ShapeTangentMode.Linear);
-            }
-            else
-            {
-                spline.SetTangentMode(i, ShapeTangentMode.Continuous);
-                spline.SetLeftTangent(i, Vector3.left * xSpacing * 0.5f);
-                spline.SetRightTangent(i, Vector3.right * xSpacing * 0.5f);
-            }
+            spline.SetTangentMode(i, ShapeTangentMode.Linear); // Linear is safest for closed shapes
         }
-        spriteShapeController.BakeMesh();
 
-        spline.isOpenEnded = false;
+        spline.isOpenEnded = false; // ✅ Closes the shape
+        spriteShapeController.RefreshSpriteShape();
+        spriteShapeController.BakeMesh();
     }
 }
