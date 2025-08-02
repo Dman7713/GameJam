@@ -12794,7 +12794,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.65, y: 0.7}
+  m_Size: {x: 0.67, y: 0.7}
   m_EdgeRadius: 0
 --- !u!114 &1337959973
 MonoBehaviour:
@@ -12830,9 +12830,10 @@ MonoBehaviour:
   popupFadeDuration: 1.5
   maxPopupRotationAngle: 10
   comboResetDelay: 1.5
-  fastSpeedThreshold: 8
-  mediumSpeedThreshold: 3
-  perfectLandingMaxAngle: 10
+  perfectLandingMinSpeed: 6
+  perfectLandingMaxSpeed: 20
+  cleanLandingMinSpeed: 4
+  cleanLandingMaxSpeed: 6
 --- !u!1 &1407242514
 GameObject:
   m_ObjectHideFlags: 0
