@@ -34,6 +34,8 @@ public class InfiniteMapGenerator : MonoBehaviour
             player = GameObject.FindGameObjectWithTag("Player").transform;
 
         spriteShapeController.spline.Clear();
+        spriteShapeController.BakeMesh();
+        spriteShapeController.BakeCollider();
 
         UpdateChunks();
     }
@@ -45,13 +47,13 @@ public class InfiniteMapGenerator : MonoBehaviour
 
     private void UpdateChunks()
     {
-        float chunkWorldSize = chunkSize * xSpacing;
+        float chunkWorldSize = chunkSize * xSpacing * transform.localScale.x;
         int playerChunk = Mathf.FloorToInt(player.position.x / chunkWorldSize);
 
         HashSet<int> requiredChunks = new HashSet<int>();
-        int loadRange = Mathf.CeilToInt(spawnRadius / chunkWorldSize);
+        float loadRange = spawnRadius / chunkWorldSize;
 
-        for (int i = playerChunk - loadRange; i <= playerChunk + loadRange; i++)
+        for (int i = (int)(playerChunk - loadRange); i <= playerChunk + loadRange; i++)
         {
             requiredChunks.Add(i);
             if (!loadedChunkIndices.Contains(i))
@@ -151,6 +153,7 @@ public class InfiniteMapGenerator : MonoBehaviour
 
         for (int i = allTopPoints.Count - 1; i >= 0; i--)
         {
+            if (i != allTopPoints.Count - 1 && i != 0) { continue; }
             Vector3 bottomPoint = new Vector3(allTopPoints[i].x, bottomY, 0);
             activePoints.Add(bottomPoint);
         }
