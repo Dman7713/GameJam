@@ -12620,7 +12620,7 @@ MonoBehaviour:
   _frontTireRB: {fileID: 1441544466}
   _backTireRB: {fileID: 721341767}
   _carRB: {fileID: 1337959965}
-  _speed: 1000
+  _speed: 800
   _rotationSpeed: 80
   _airRotationMultiplier: 6
   groundLayer:
@@ -12830,6 +12830,12 @@ MonoBehaviour:
   popupFadeDuration: 1.5
   maxPopupRotationAngle: 10
   comboResetDelay: 1.5
+  cleanLandingMinSpeed: 20
+  cleanLandingMaxSpeed: 45
+  perfectLandingMinSpeed: 46
+  perfectLandingMaxSpeed: 1000
+  landingAngleTolerance: 10
+  dualWheelGroundWindow: 0.2
 --- !u!1 &1407242514
 GameObject:
   m_ObjectHideFlags: 0
