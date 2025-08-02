@@ -5,21 +5,17 @@ using System.Collections;
 public class StuntManager : MonoBehaviour
 {
     [Header("References")]
-    public GameObject stuntTextPrefab;       // Prefab with TextMeshProUGUI for stunt popup
-    public Canvas uiCanvas;                   // UI Canvas (Screen Space - Overlay)
-    public TextMeshProUGUI totalScoreText;   // Score display text
+    public GameObject stuntTextPrefab;
+    public Canvas uiCanvas;
+    public TextMeshProUGUI totalScoreText;
 
     [Header("Settings")]
-    public float minAirTimeForStunts = 0.3f;     
+    public float minAirTimeForStunts = 0.3f;
     public float popupScaleDuration = 0.3f;
     public float popupVisibleDuration = 1f;
     public float popupFadeDuration = 1.5f;
     public float maxPopupRotationAngle = 10f;
-    public float comboResetDelay = 1.5f;     // Time to reset combo if no stunt occurs
-
-    [Header("Slow Motion Settings")]
-    public float slowMoDuration = 0.5f;
-    public float slowMoTimeScale = 0.2f;
+    public float comboResetDelay = 1.5f;
 
     private Rigidbody2D bikeRigidbody;
 
@@ -32,11 +28,9 @@ public class StuntManager : MonoBehaviour
     private int totalScore = 0;
     private Coroutine scoreCountingCoroutine;
 
-    // Combo tracking
     private int currentComboCount = 0;
     private float comboTimer = 0f;
 
-    // Perfect landing flag (for demo, here we define perfect landing as less than 10 degrees rotation on landing)
     private const float perfectLandingMaxAngle = 10f;
 
     public static int Score { get; private set; } = 0;
@@ -50,7 +44,6 @@ public class StuntManager : MonoBehaviour
 
     void Update()
     {
-        // Combo reset timer counts down in Update
         if (currentComboCount > 0)
         {
             comboTimer -= Time.deltaTime;
@@ -61,8 +54,7 @@ public class StuntManager : MonoBehaviour
         }
     }
 
-    // Call every FixedUpdate from DriverController
-    public void HandleStuntTracking(bool grounded, bool wasGroundedPrev, Rigidbody2D rb)
+    public void HandleStuntTracking(bool grounded, bool isDead, Rigidbody2D rb, bool frontTireGrounded, bool backTireGrounded, bool landedThisFrame)
     {
         float currentRotationZ = NormalizeAngle(transform.eulerAngles.z);
         float deltaRotation = Mathf.DeltaAngle(lastRotationZ, currentRotationZ);
@@ -74,79 +66,118 @@ public class StuntManager : MonoBehaviour
         }
         else
         {
-            // Just landed this frame
-            if (wasInAirLastFrame)
+            if (wasInAirLastFrame && landedThisFrame)
             {
                 if (airtime >= minAirTimeForStunts)
                 {
                     int fullFlips = Mathf.FloorToInt(Mathf.Abs(cumulativeRotation) / 360f);
-                    float landingAngle = Mathf.Abs(Mathf.DeltaAngle(currentRotationZ, 0f)); // angle difference from upright
-
+                    float landingAngle = Mathf.Abs(Mathf.DeltaAngle(currentRotationZ, 0f));
                     bool perfectLanding = landingAngle <= perfectLandingMaxAngle;
 
                     int basePoints = 0;
                     string stuntLabel = null;
 
+                    VertexGradient stuntGradient = default;
+
+                    // FLIPS: award if player survived (not dead)
                     if (fullFlips > 0)
                     {
                         bool isFrontFlip = cumulativeRotation < 0;
-                        basePoints = fullFlips * 100;
                         stuntLabel = isFrontFlip ? $"Frontflip! x{fullFlips}" : $"Backflip! x{fullFlips}";
+                        basePoints = fullFlips * 100;
+
+                        stuntGradient = isFrontFlip ? VertexGradientFrontflip() : VertexGradientBackflip();
+
+                        if (isDead)
+                        {
+                            Debug.Log($"Completed {stuntLabel} for 0 points (dead on landing)");
+                            ResetStuntTracking();
+                            return;
+                        }
                     }
-                    else if (perfectLanding)
+                    else if (frontTireGrounded && backTireGrounded)
                     {
-                        // Award for perfect landing even without flips
-                        basePoints = 50;
-                        stuntLabel = "Perfect Landing!";
+                        float landingSpeed = rb.linearVelocity.magnitude;
+
+                        if (perfectLanding && landingSpeed > 7f)
+                        {
+                            stuntLabel = "Perfect Landing!";
+                            basePoints = 50;
+                            stuntGradient = VertexGradientPerfectLanding();
+                        }
+                        else if (!perfectLanding && landingSpeed > 3.5f)
+                        {
+                            stuntLabel = "Clean Landing!";
+                            basePoints = 25;
+                            stuntGradient = VertexGradientCleanLanding();
+                        }
+                        else
+                        {
+                            stuntLabel = null;
+                            basePoints = 0;
+                        }
+
+                        if (isDead)
+                        {
+                            if (stuntLabel != null)
+                                Debug.Log($"Completed {stuntLabel} for 0 points (dead on landing)");
+                            ResetStuntTracking();
+                            return;
+                        }
                     }
                     else
                     {
-                        // Could add clean landing points here
                         basePoints = 0;
+                        stuntLabel = null;
+
+                        if (isDead)
+                        {
+                            ResetStuntTracking();
+                            return;
+                        }
                     }
 
-                    if (basePoints > 0)
+                    // Airtime points only if airtime > 1 second
+                    if (airtime > 1f)
                     {
-                        // Increase combo count and reset combo timer
+                        float airtimeRounded = Mathf.Round(airtime * 2f) / 2f;
+                        int airtimePoints = Mathf.RoundToInt(airtimeRounded * 10f);
+                        if (airtimePoints > 0)
+                        {
+                            ShowStuntPopup($"Airtime! ({airtimeRounded}s)", airtimePoints, VertexGradientAirtime());
+                            AddScore(airtimePoints);
+                            Debug.Log($"Completed Airtime! ({airtimeRounded}s) for {airtimePoints} points");
+                        }
+                    }
+
+                    if (basePoints > 0 && stuntLabel != null)
+                    {
                         currentComboCount++;
                         comboTimer = comboResetDelay;
 
-                        // Calculate combo multiplier
-                        float comboMultiplier = 1f + (currentComboCount - 1) * 0.5f; // e.g. x1, x1.5, x2, etc.
+                        float comboMultiplier = 1f + (currentComboCount - 1) * 0.5f;
                         int points = Mathf.RoundToInt(basePoints * comboMultiplier);
 
-                        // Show stunt popup
-                        if (!string.IsNullOrEmpty(stuntLabel))
-                            ShowStuntPopup(stuntLabel, points);
+                        ShowStuntPopup(stuntLabel, points, stuntGradient);
 
-                        // Show combo popup if 2+ combo
                         if (currentComboCount > 1)
                             ShowComboPopup(currentComboCount);
 
+                        Debug.Log($"Completed {stuntLabel} for {points} points");
+
                         AddScore(points);
 
-                        // Screen shake for every stunt landing
                         if (CameraShake.Instance != null)
                         {
                             CameraShake.Instance.Shake(0.15f, 0.5f);
                         }
-
-                        // Slow motion on perfect landing or multi-flip
-                        if (perfectLanding || fullFlips > 1)
-                        {
-                            StartCoroutine(DoSlowMotion());
-                        }
                     }
                     else
                     {
-                        // Reset combo if no points
                         currentComboCount = 0;
                     }
                 }
-
-                // Reset rotation and airtime every landing
-                cumulativeRotation = 0f;
-                airtime = 0f;
+                ResetStuntTracking();
             }
         }
 
@@ -154,7 +185,13 @@ public class StuntManager : MonoBehaviour
         wasInAirLastFrame = !grounded;
     }
 
-    void ShowStuntPopup(string label, int points)
+    void ResetStuntTracking()
+    {
+        cumulativeRotation = 0f;
+        airtime = 0f;
+    }
+
+    void ShowStuntPopup(string label, int points, VertexGradient gradient)
     {
         if (stuntTextPrefab == null || uiCanvas == null)
             return;
@@ -181,7 +218,7 @@ public class StuntManager : MonoBehaviour
         {
             text.text = $"{label}\n+{points}";
             text.alpha = 0f;
-            text.color = Color.white;
+            text.colorGradient = gradient;
         }
 
         StartCoroutine(AnimateStuntPopup(popupRect, text));
@@ -192,7 +229,6 @@ public class StuntManager : MonoBehaviour
         if (stuntTextPrefab == null || uiCanvas == null)
             return;
 
-        // Create combo popup at center top-ish screen, bigger and with gradient colors
         Vector2 screenPos = new Vector2(Screen.width * 0.5f, Screen.height * 0.8f);
 
         RectTransform canvasRect = uiCanvas.GetComponent<RectTransform>();
@@ -204,7 +240,6 @@ public class StuntManager : MonoBehaviour
         popupRect.localPosition = localPos;
         popupRect.localScale = Vector3.zero;
 
-        // No random rotation for combo, keep upright
         popupRect.localRotation = Quaternion.identity;
 
         TextMeshProUGUI text = popup.GetComponentInChildren<TextMeshProUGUI>();
@@ -213,10 +248,9 @@ public class StuntManager : MonoBehaviour
             text.text = $"x{comboCount} Combo!";
             text.alpha = 0f;
 
-            // Gradient colors: start orange, end yellow for combo hype
             var gradient = new VertexGradient(
-                new Color32(255, 165, 0, 255),   // Orange
-                new Color32(255, 215, 0, 255),   // Gold
+                new Color32(255, 165, 0, 255),
+                new Color32(255, 215, 0, 255),
                 new Color32(255, 215, 0, 255),
                 new Color32(255, 165, 0, 255)
             );
@@ -230,7 +264,6 @@ public class StuntManager : MonoBehaviour
     {
         float timer = 0f;
 
-        // Scale & fade in
         while (timer < popupScaleDuration)
         {
             timer += Time.deltaTime;
@@ -242,10 +275,8 @@ public class StuntManager : MonoBehaviour
         popupRect.localScale = Vector3.one;
         text.alpha = 1f;
 
-        // Visible duration
         yield return new WaitForSeconds(popupVisibleDuration);
 
-        // Fade out & scale down
         timer = 0f;
         while (timer < popupFadeDuration)
         {
@@ -261,7 +292,6 @@ public class StuntManager : MonoBehaviour
 
     IEnumerator AnimateComboPopup(RectTransform popupRect, TextMeshProUGUI text)
     {
-        // Bounce + fade in + scale up quickly for satisfying effect
         float bounceDuration = 0.15f;
         float timer = 0f;
 
@@ -273,14 +303,12 @@ public class StuntManager : MonoBehaviour
         {
             timer += Time.deltaTime;
             float t = timer / bounceDuration;
-            // Bounce with overshoot curve
             float scaleT = Mathf.Sin(t * Mathf.PI * 0.75f);
             popupRect.localScale = Vector3.LerpUnclamped(startScale, overshootScale, scaleT);
             text.alpha = t;
             yield return null;
         }
 
-        // Bounce back to normal scale
         timer = 0f;
         while (timer < bounceDuration)
         {
@@ -293,10 +321,8 @@ public class StuntManager : MonoBehaviour
         popupRect.localScale = targetScale;
         text.alpha = 1f;
 
-        // Hold for a bit
         yield return new WaitForSeconds(popupVisibleDuration);
 
-        // Fade out smoothly
         timer = 0f;
         while (timer < popupFadeDuration)
         {
@@ -357,14 +383,49 @@ public class StuntManager : MonoBehaviour
         return angle;
     }
 
-    IEnumerator DoSlowMotion()
+    // VertexGradient presets for different stunt types
+    VertexGradient VertexGradientFrontflip()
     {
-        Time.timeScale = slowMoTimeScale;
-        Time.fixedDeltaTime = 0.02f * Time.timeScale;
+        return new VertexGradient(
+            new Color32(0, 122, 255, 255),
+            new Color32(0, 255, 255, 255),
+            new Color32(0, 122, 255, 255),
+            new Color32(0, 255, 255, 255));
+    }
 
-        yield return new WaitForSecondsRealtime(slowMoDuration);
+    VertexGradient VertexGradientBackflip()
+    {
+        return new VertexGradient(
+            new Color32(128, 0, 128, 255),
+            new Color32(255, 0, 255, 255),
+            new Color32(128, 0, 128, 255),
+            new Color32(255, 0, 255, 255));
+    }
 
-        Time.timeScale = 1f;
-        Time.fixedDeltaTime = 0.02f;
+    VertexGradient VertexGradientPerfectLanding()
+    {
+        return new VertexGradient(
+            new Color32(0, 255, 0, 255),
+            new Color32(144, 238, 144, 255),
+            new Color32(0, 255, 0, 255),
+            new Color32(144, 238, 144, 255));
+    }
+
+    VertexGradient VertexGradientCleanLanding()
+    {
+        return new VertexGradient(
+            new Color32(255, 140, 0, 255),
+            new Color32(255, 215, 0, 255),
+            new Color32(255, 140, 0, 255),
+            new Color32(255, 215, 0, 255));
+    }
+
+    VertexGradient VertexGradientAirtime()
+    {
+        return new VertexGradient(
+            new Color32(0, 128, 128, 255),
+            new Color32(173, 216, 230, 255),
+            new Color32(0, 128, 128, 255),
+            new Color32(173, 216, 230, 255));
     }
 }

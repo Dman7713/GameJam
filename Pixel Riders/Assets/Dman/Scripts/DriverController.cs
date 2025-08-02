@@ -13,13 +13,21 @@ public class DriverController : MonoBehaviour
 
     [Header("Ground Detection")]
     [SerializeField] private LayerMask groundLayer;
-    [SerializeField] private Transform groundCheck;
-    [SerializeField] private float groundCheckRadius = 0.1f;
+    [SerializeField] private Transform frontTireGroundCheck;
+    [SerializeField] private Transform backTireGroundCheck;
+    [SerializeField] [Range(0.01f, 0.5f)] private float groundCheckRadius = 0.1f;
 
     [Header("Camera Zoom")]
     public CameraZoomOnAir cameraZoom;  // Assign this in inspector
 
     private bool _isGrounded;
+    private bool _wasGroundedLastFrame;
+    private bool _landedThisFrame;
+    private bool _isDead; // Set this flag externally when player dies
+
+    private bool _frontTireGrounded;
+    private bool _backTireGrounded;
+
     private StuntManager _stuntManager;
 
     private void Awake()
@@ -33,10 +41,13 @@ public class DriverController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        bool wasGrounded = _isGrounded;
-        _isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+        _frontTireGrounded = Physics2D.OverlapCircle(frontTireGroundCheck.position, groundCheckRadius, groundLayer);
+        _backTireGrounded = Physics2D.OverlapCircle(backTireGroundCheck.position, groundCheckRadius, groundLayer);
+        _isGrounded = _frontTireGrounded || _backTireGrounded;
 
-        // Update camera zoom based on grounded state
+        _landedThisFrame = !_wasGroundedLastFrame && _isGrounded;
+        _wasGroundedLastFrame = _isGrounded;
+
         if (cameraZoom != null)
         {
             cameraZoom.isGrounded = _isGrounded;
@@ -45,7 +56,14 @@ public class DriverController : MonoBehaviour
         HandleMovement();
         HandleAirRotation();
 
-        _stuntManager?.HandleStuntTracking(_isGrounded, wasGrounded, _carRB);
+        _stuntManager?.HandleStuntTracking(
+            _isGrounded,
+            _isDead,
+            _carRB,
+            _frontTireGrounded,
+            _backTireGrounded,
+            _landedThisFrame
+        );
     }
 
     private void HandleMovement()
@@ -81,12 +99,28 @@ public class DriverController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Call this method from your death logic to tell the stunt system the player is dead.
+    /// </summary>
+    public void SetDead(bool dead)
+    {
+        _isDead = dead;
+    }
+
+#if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
-        if (groundCheck != null)
+        if (frontTireGroundCheck != null)
         {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(frontTireGroundCheck.position, groundCheckRadius);
+        }
+
+        if (backTireGroundCheck != null)
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireSphere(backTireGroundCheck.position, groundCheckRadius);
         }
     }
+#endif
 }
