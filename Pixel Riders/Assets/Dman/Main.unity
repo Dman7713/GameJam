@@ -12548,7 +12548,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1337959964}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6d62bed17f224024cba6517953ebc2cb, type: 3}
   m_Name: 
@@ -14579,7 +14579,6 @@ GameObject:
   - component: {fileID: 2051436525}
   - component: {fileID: 2051436524}
   - component: {fileID: 2051436523}
-  - component: {fileID: 2051436527}
   - component: {fileID: 2051436528}
   - component: {fileID: 2051436529}
   m_Layer: 6
@@ -16180,30 +16179,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2051436527
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2051436522}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7c8f0cbe344948a488b008a89b0dd4a7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _spriteShapeController: {fileID: 2051436524}
-  _levelLength: 100
-  _xMultiplier: 2
-  _yMultiplier: 5.1
-  _curveSmoothness: 0.276
-  _noiseStep: 0.35
-  _bottom: 20.51
-  playerCamera: {fileID: 1070850722}
-  _chunkUpdateTime: 0.1
-  _spawnFromCameraOffset: {x: 0, y: 0}
-  perlinNoiseSeed: 0
-  spawnRadius: 40
 --- !u!251 &2051436528
 PlatformEffector2D:
   m_ObjectHideFlags: 0
@@ -16244,7 +16219,7 @@ MonoBehaviour:
   noiseStep: 0.2
   perlinSeed: 0
   player: {fileID: 1337959966}
-  spawnRadius: 40
+  spawnRadius: 100
   chunkDespawnBuffer: 1
 --- !u!1001 &1170525519908766445
 PrefabInstance:
