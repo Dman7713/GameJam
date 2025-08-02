@@ -34,8 +34,6 @@ public class InfiniteMapGenerator : MonoBehaviour
             player = GameObject.FindGameObjectWithTag("Player").transform;
 
         spriteShapeController.spline.Clear();
-        spriteShapeController.BakeMesh();
-        spriteShapeController.BakeCollider();
 
         UpdateChunks();
     }
@@ -164,6 +162,7 @@ public class InfiniteMapGenerator : MonoBehaviour
         for (int i = 0; i < activePoints.Count; i++)
         {
             spline.InsertPointAt(i, activePoints[i]);
+            spriteShapeController.RefreshSpriteShape();
         }
 
         int totalPoints = spline.GetPointCount();
@@ -181,8 +180,8 @@ public class InfiniteMapGenerator : MonoBehaviour
                 spline.SetRightTangent(i, Vector3.right * xSpacing * 0.5f);
             }
         }
+        spriteShapeController.BakeMesh();
 
         spline.isOpenEnded = false;
-        spriteShapeController.BakeMesh();
     }
 }
