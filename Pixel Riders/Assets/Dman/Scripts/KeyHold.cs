@@ -8,10 +8,12 @@ public class ArrowKeyImageSwitcher : MonoBehaviour
         Up,
         Down,
         Left,
-        Right
+        Right,
+        Space,
     }
 
     [Header("Key Settings")]
+    [EnumButtons]
     public ArrowKey arrowKey = ArrowKey.Up;
 
     [Header("Image Settings")]
@@ -19,15 +21,16 @@ public class ArrowKeyImageSwitcher : MonoBehaviour
     public Sprite normalSprite;
     public Sprite heldSprite;
 
-    private KeyCode GetKeyCode()
+    private (KeyCode, KeyCode) GetKeyCode()
     {
         switch (arrowKey)
         {
-            case ArrowKey.Up: return KeyCode.UpArrow;
-            case ArrowKey.Down: return KeyCode.DownArrow;
-            case ArrowKey.Left: return KeyCode.LeftArrow;
-            case ArrowKey.Right: return KeyCode.RightArrow;
-            default: return KeyCode.None;
+            case ArrowKey.Up: return (KeyCode.UpArrow, KeyCode.W);
+            case ArrowKey.Down: return ((KeyCode.DownArrow, KeyCode.S));
+            case ArrowKey.Left: return (KeyCode.LeftArrow, KeyCode.A);
+            case ArrowKey.Right: return (KeyCode.RightArrow, KeyCode.D);
+            case ArrowKey.Space: return (KeyCode.Space, KeyCode.LeftShift);
+            default: return (KeyCode.None, KeyCode.None);
         }
     }
 
@@ -36,9 +39,10 @@ public class ArrowKeyImageSwitcher : MonoBehaviour
         if (targetImage == null || normalSprite == null || heldSprite == null)
             return;
 
-        KeyCode selectedKey = GetKeyCode();
+        (KeyCode, KeyCode) selectedKey = GetKeyCode();
 
-        if (Input.GetKey(selectedKey))
+
+        if (Input.GetKey(selectedKey.Item1) || Input.GetKey(selectedKey.Item2))
         {
             targetImage.sprite = heldSprite;
         }

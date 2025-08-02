@@ -45,8 +45,11 @@ TagManager:
   - name: Sky
     uniqueID: 2075383729
     locked: 0
-  - name: Fog
-    uniqueID: 3171903519
+  - name: Very Behind Map
+    uniqueID: 3506778401
+    locked: 0
+  - name: Behind Map
+    uniqueID: 1275823363
     locked: 0
   - name: Moutains_Distant
     uniqueID: 1878494127
@@ -60,14 +63,11 @@ TagManager:
   - name: Fog
     uniqueID: 4072806841
     locked: 0
-  - name: Very Behind Map
-    uniqueID: 3506778401
-    locked: 0
-  - name: Behind Map
-    uniqueID: 1275823363
-    locked: 0
   - name: Map
     uniqueID: 4083618361
+    locked: 0
+  - name: Fog
+    uniqueID: 3171903519
     locked: 0
   - name: Player
     uniqueID: 1088683577
