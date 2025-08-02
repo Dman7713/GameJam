@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.U2D;
 
@@ -11,7 +12,7 @@ public class InfiniteMapGenerator : MonoBehaviour
     [SerializeField] private int chunkSize = 20;
     [SerializeField] private float xSpacing = 1.5f;
     [SerializeField] private float yMultiplier = 3f;
-    [SerializeField] private float baseY = 1.5f;
+    [SerializeField] private float baseY = 10f;
     [SerializeField] private float bottomY = 0f;
     [SerializeField] private float noiseStep = 0.2f;
     [SerializeField] private int perlinSeed = 0;
@@ -34,6 +35,21 @@ public class InfiniteMapGenerator : MonoBehaviour
             player = GameObject.FindGameObjectWithTag("Player").transform;
 
         spriteShapeController.spline.Clear();
+
+        // Delay generation to let camera/rendering settle
+        StartCoroutine(DelayedInitialGeneration());
+        StartCoroutine(ForceVisibilityFix());
+    }
+
+    private IEnumerator DelayedInitialGeneration()
+    {
+        yield return new WaitForEndOfFrame();
+        UpdateChunks();
+    }
+
+    private IEnumerator ForceVisibilityFix()
+    {
+        yield return new WaitForSeconds(1f);
         UpdateChunks();
     }
 
@@ -114,7 +130,6 @@ public class InfiniteMapGenerator : MonoBehaviour
             topPoints.Add(new Vector3(x, y, 0));
         }
 
-        // Smooth connection to previous chunk
         if (generatedChunks.ContainsKey(chunkIndex - 1))
         {
             List<Vector3> prevChunk = generatedChunks[chunkIndex - 1];
@@ -149,10 +164,8 @@ public class InfiniteMapGenerator : MonoBehaviour
         if (allTopPoints.Count == 0)
             return;
 
-        // Add top points
         activePoints.AddRange(allTopPoints);
 
-        // Add bottom points in reverse order to close the shape
         for (int i = allTopPoints.Count - 1; i >= 0; i--)
         {
             Vector3 top = allTopPoints[i];
@@ -165,26 +178,32 @@ public class InfiniteMapGenerator : MonoBehaviour
 
         for (int i = 0; i < activePoints.Count; i++)
         {
-            // Avoid very close points
             if (i == 0 || Vector3.Distance(activePoints[i], activePoints[i - 1]) > 0.01f)
             {
                 spline.InsertPointAt(spline.GetPointCount(), activePoints[i]);
             }
-            else
-            {
-                Debug.LogWarning($"Skipped point {i} due to proximity.");
-            }
         }
 
         int totalPoints = spline.GetPointCount();
-
         for (int i = 0; i < totalPoints; i++)
         {
-            spline.SetTangentMode(i, ShapeTangentMode.Linear); // Linear is safest for closed shapes
+            spline.SetTangentMode(i, ShapeTangentMode.Linear);
         }
 
-        spline.isOpenEnded = false; // ✅ Closes the shape
+        spline.isOpenEnded = false;
+
+        // Force visibility refresh
         spriteShapeController.RefreshSpriteShape();
         spriteShapeController.BakeMesh();
+
+        // Toggle renderer visibility to force redraw
+        var renderer = spriteShapeController.GetComponent<Renderer>();
+        if (renderer != null)
+        {
+            renderer.enabled = false;
+            renderer.enabled = true;
+        }
+
+        Canvas.ForceUpdateCanvases();
     }
 }
