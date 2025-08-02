@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 629568571120514780}
   - component: {fileID: 924038845548971209}
   - component: {fileID: 2937653219038516892}
+  - component: {fileID: 526764563628475594}
   m_Layer: 0
   m_Name: TempCoin
   m_TagString: Untagged
@@ -30,7 +31,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 18.99, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.6512027, y: 1.6512027, z: 1.6512027}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8444297993796640734}
@@ -78,9 +79,9 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -211348935
-  m_SortingLayer: 7
+  m_SortingLayer: 9
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 549160e9358792048a71925df6318ba4, type: 3}
+  m_Sprite: {fileID: 4810702507026764722, guid: 87919a3867911264cbdf9e16af0c70a2, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -144,7 +145,7 @@ MonoBehaviour:
   playerTag: Player
   collectEffectPrefab: {fileID: 8148167748626786214}
   collectAudioSource: {fileID: 2937653219038516892}
-  collectSoundClip: {fileID: 8300000, guid: 432625910b31871469d3c22b6aeb7eba, type: 3}
+  collectSoundClip: {fileID: 8300000, guid: 2924e9fb353307d41a5a1ab817090a48, type: 3}
   scoreCanvasParentName: ScoreCanvas
   coinDisplayChildName: CoinDisplay
   coinTextFormat: 'Coins: {0}'
@@ -160,8 +161,8 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_Resource: {fileID: 8300000, guid: 2924e9fb353307d41a5a1ab817090a48, type: 3}
+  m_PlayOnAwake: 0
   m_Volume: 0.5
   m_Pitch: 1
   Loop: 0
@@ -246,6 +247,28 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!95 &526764563628475594
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 664809749524809054}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: b84e7be41b98c284bb1ed1c434efa183, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &8148167748626786214
 GameObject:
   m_ObjectHideFlags: 0
@@ -5103,7 +5126,7 @@ ParticleSystemRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -211348935
-  m_SortingLayer: 7
+  m_SortingLayer: 9
   m_SortingOrder: 0
   m_RenderMode: 0
   m_MeshDistribution: 0

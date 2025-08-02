@@ -133,12 +133,15 @@ public class DeathManager : MonoBehaviour
                 StartCoroutine(PulseText(_deathText, 0.05f, 0.5f));
             }
 
+            // The final score text pops up immediately after the death text animation is complete
             if (_finalScoreText != null)
             {
                 _finalScoreText.text = $"Score: {StuntManager.Score}";
-                StartCoroutine(AnimateDeathText(_finalScoreText, 0.75f, 1.5f, 1f));
+                StartCoroutine(AnimateDeathText(_finalScoreText, 0.5f, 0f, 1f));
             }
 
+            // The high score text pops up after the final score text. 
+            // A delay of 0.75f (which is the animation time) makes this feel more deliberate
             if (_highScoreText != null)
             {
                 int currentScore = StuntManager.Score;
@@ -152,7 +155,7 @@ public class DeathManager : MonoBehaviour
                 }
 
                 _highScoreText.text = $"High Score: {highScore}";
-                StartCoroutine(AnimateDeathText(_highScoreText, 0.75f, 3.0f, 1f));
+                StartCoroutine(AnimateDeathText(_highScoreText, 0.75f, 0.5f, 1f));
             }
         }
     }
