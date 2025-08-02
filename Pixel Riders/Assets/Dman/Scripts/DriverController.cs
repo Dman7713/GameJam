@@ -133,12 +133,12 @@ public class DriverController : MonoBehaviour
     {
         float torque = _speed * Time.fixedDeltaTime;
 
-        if (Input.GetKey(KeyCode.UpArrow))
+        if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
         {
             _frontTireRB.AddTorque(-torque);
             _backTireRB.AddTorque(-torque);
         }
-        else if (Input.GetKey(KeyCode.DownArrow))
+        else if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
         {
             _frontTireRB.AddTorque(torque);
             _backTireRB.AddTorque(torque);
@@ -152,11 +152,11 @@ public class DriverController : MonoBehaviour
         {
             float rotationTorque = _rotationSpeed * _airRotationMultiplier * Time.fixedDeltaTime;
 
-            if (Input.GetKey(KeyCode.LeftArrow))
+            if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
             {
                 _bikeRigidbody.AddTorque(rotationTorque);
             }
-            else if (Input.GetKey(KeyCode.RightArrow))
+            else if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
             {
                 _bikeRigidbody.AddTorque(-rotationTorque);
             }
