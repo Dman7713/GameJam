@@ -60,6 +60,12 @@ TagManager:
   - name: Fog
     uniqueID: 4072806841
     locked: 0
+  - name: Very Behind Map
+    uniqueID: 3506778401
+    locked: 0
+  - name: Behind Map
+    uniqueID: 1275823363
+    locked: 0
   - name: Map
     uniqueID: 4083618361
     locked: 0

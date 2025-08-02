@@ -80,7 +80,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -211348935
-  m_SortingLayer: 7
+  m_SortingLayer: 9
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: e25b490e6efacf648b48f47015980859, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -169,7 +169,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   warningSpritePrefab: {fileID: 2303446640740268439, guid: 26ba3825867947c4c834e42803317837, type: 3}
-  impactSound: {fileID: 8300000, guid: c0d9e3b9901bbe7479dfd21a1ee6c8b8, type: 3}
   fallSpeed: 10
   warningTime: 2
   warningSpriteOffset: 1.5
@@ -5072,7 +5071,7 @@ ParticleSystemRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -211348935
-  m_SortingLayer: 7
+  m_SortingLayer: 9
   m_SortingOrder: 0
   m_RenderMode: 0
   m_MeshDistribution: 0
@@ -5180,10 +5179,10 @@ TrailRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 1275823363
+  m_SortingLayer: 8
   m_SortingOrder: 0
-  m_Time: 5
+  m_Time: 3
   m_PreviewTimeScale: 1
   m_Parameters:
     serializedVersion: 3
@@ -5215,7 +5214,7 @@ TrailRenderer:
     colorGradient:
       serializedVersion: 2
       key0: {r: 0.8773585, g: 0.13656996, b: 0.13656996, a: 1}
-      key1: {r: 0.8018868, g: 0.30547294, b: 0.16264686, a: 1}
+      key1: {r: 0.8962264, g: 0.3914908, b: 0.12259703, a: 1}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}

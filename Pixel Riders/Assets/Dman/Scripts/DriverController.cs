@@ -1,6 +1,7 @@
 using UnityEngine;
 
-public class StuntCarController : MonoBehaviour
+[RequireComponent(typeof(StuntManager))]
+public class DriverController : MonoBehaviour
 {
     [Header("Car Physics")]
     [SerializeField] private Rigidbody2D _frontTireRB;
@@ -9,6 +10,8 @@ public class StuntCarController : MonoBehaviour
     [SerializeField] private float _speed = 150f;
     [SerializeField] private float _rotationSpeed = 300f;
     [SerializeField] private float _airRotationMultiplier = 2f;
+
+    [Header("Ground Detection")]
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundCheckRadius = 0.1f;
@@ -20,41 +23,53 @@ public class StuntCarController : MonoBehaviour
     {
         _stuntManager = GetComponent<StuntManager>();
         if (_stuntManager == null)
-            Debug.LogError("StuntManager component is missing!");
+        {
+            Debug.LogError("StuntManager component not found on DriverController GameObject.");
+        }
     }
 
     private void FixedUpdate()
     {
         bool wasGrounded = _isGrounded;
-        _isGrounded = Physics2D.CircleCast(groundCheck.position, groundCheckRadius, Vector2.down, 0.1f, groundLayer);
+        _isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
 
-        // Drive logic
+        HandleMovement();
+        HandleAirRotation();
+
+        _stuntManager?.HandleStuntTracking(_isGrounded, wasGrounded, _carRB);
+    }
+
+    private void HandleMovement()
+    {
+        float torque = _speed * Time.fixedDeltaTime;
+
         if (Input.GetKey(KeyCode.UpArrow))
         {
-            float torque = _speed * Time.fixedDeltaTime;
             _frontTireRB.AddTorque(-torque);
             _backTireRB.AddTorque(-torque);
         }
         else if (Input.GetKey(KeyCode.DownArrow))
         {
-            float torque = _speed * Time.fixedDeltaTime;
             _frontTireRB.AddTorque(torque);
             _backTireRB.AddTorque(torque);
         }
+    }
 
-        // Air rotation
+    private void HandleAirRotation()
+    {
         if (!_isGrounded)
         {
             float rotationTorque = _rotationSpeed * _airRotationMultiplier * Time.fixedDeltaTime;
 
             if (Input.GetKey(KeyCode.LeftArrow))
+            {
                 _carRB.AddTorque(rotationTorque);
+            }
             else if (Input.GetKey(KeyCode.RightArrow))
+            {
                 _carRB.AddTorque(-rotationTorque);
+            }
         }
-
-        // Notify StuntManager
-        _stuntManager?.HandleStuntTracking(_isGrounded, wasGrounded, _carRB);
     }
 
     private void OnDrawGizmosSelected()

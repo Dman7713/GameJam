@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using TMPro;
 
@@ -7,10 +7,12 @@ public class DeathManager : MonoBehaviour
     public static DeathManager Instance;
 
     [SerializeField] private Transform bikeRoot;
-    [SerializeField] private Transform head; // ✅ Only unparent the head
+    [SerializeField] private Transform head; // Only unparent the head
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private StuntManager stuntManager;
     [SerializeField] private GameObject _scoreUIObject;
+
+    [SerializeField] private ParticleSystem _deathParticleEffect;
 
     [Header("Death UI")]
     [SerializeField] private GameObject _deathCanvas;
@@ -72,17 +74,26 @@ public class DeathManager : MonoBehaviour
             return;
         }
 
-        // ✅ Disable only joints on the head
+        if (_deathParticleEffect != null)
+        {
+            _deathParticleEffect.transform.SetParent(null);
+            _deathParticleEffect.transform.localScale = Vector3.one;
+            _deathParticleEffect.Play();
+            Destroy(_deathParticleEffect.gameObject, 2f);
+        }
+        else
+        {
+            Debug.LogError("Death particle effect is not assigned in the Inspector!");
+        }
+
         foreach (HingeJoint2D hinge in head.GetComponents<HingeJoint2D>())
             hinge.enabled = false;
 
         foreach (WheelJoint2D wheel in head.GetComponents<WheelJoint2D>())
             wheel.enabled = false;
 
-        // ✅ Unparent the head
         head.SetParent(null);
 
-        // ✅ Enable ragdoll physics
         Rigidbody2D rb = head.GetComponent<Rigidbody2D>();
         if (rb == null)
             rb = head.gameObject.AddComponent<Rigidbody2D>();
@@ -100,10 +111,10 @@ public class DeathManager : MonoBehaviour
     {
         Time.timeScale = 0.3f;
 
-        // ✅ Clear stunt popups
-        if (stuntManager != null && stuntManager.stuntDisplayParent != null)
+        // Clear stunt popups if possible
+        if (stuntManager != null && stuntManager.uiCanvas != null)
         {
-            foreach (Transform child in stuntManager.stuntDisplayParent)
+            foreach (Transform child in stuntManager.uiCanvas.transform)
                 Destroy(child.gameObject);
         }
 
@@ -144,6 +155,11 @@ public class DeathManager : MonoBehaviour
                 StartCoroutine(AnimateDeathText(_highScoreText, 0.75f, 3.0f, 1f));
             }
         }
+    }
+
+    public bool IsDead()
+    {
+        return hasDied;
     }
 
     private IEnumerator PulseText(TextMeshProUGUI text, float pulseScale, float duration)
