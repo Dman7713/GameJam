@@ -16,6 +16,9 @@ public class DriverController : MonoBehaviour
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundCheckRadius = 0.1f;
 
+    [Header("Camera Zoom")]
+    public CameraZoomOnAir cameraZoom;  // Assign this in inspector
+
     private bool _isGrounded;
     private StuntManager _stuntManager;
 
@@ -32,6 +35,12 @@ public class DriverController : MonoBehaviour
     {
         bool wasGrounded = _isGrounded;
         _isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+
+        // Update camera zoom based on grounded state
+        if (cameraZoom != null)
+        {
+            cameraZoom.isGrounded = _isGrounded;
+        }
 
         HandleMovement();
         HandleAirRotation();

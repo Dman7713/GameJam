@@ -1,8 +1,3 @@
-// Meteor.cs
-// Attach this script to your meteor prefab.
-// Ensure you have a collider (e.g., CircleCollider2D or BoxCollider2D) and a Rigidbody2D.
-// You'll also need to create a "groundLayer" in Unity's Layer Manager for the prediction to work.
-
 using UnityEngine;
 using System.Collections;
 
@@ -22,91 +17,95 @@ public class Meteor : MonoBehaviour
     [Tooltip("The radius from the player at which the landed meteor will be destroyed.")]
     public float cleanupRadius = 100f;
 
+    [Header("Warning Shake Settings")]
+    [Tooltip("Radius from the player within which the warning shake starts.")]
+    public float warningShakeRadius = 20f;
+    [Tooltip("Duration of the shake before impact.")]
+    public float warningShakeDuration = 0.5f;
+    [Tooltip("Magnitude (intensity) of the shake before impact.")]
+    public float warningShakeMagnitude = 0.2f;
+
     [Header("Camera Shake")]
     [Tooltip("How long the screen will shake on impact.")]
     public float cameraShakeDuration = 0.5f;
     [Tooltip("How intense the camera shake is.")]
-    public float cameraShakeMagnitude = 10f;
+    public float cameraShakeMagnitude = 1.5f;
 
     private GameObject warningSpriteInstance;
     private Vector2 targetPosition; // Store the exact landing spot
     private bool isFalling = false;
-    private bool hasLanded = false; // New state for when the meteor has hit the ground
+    private bool hasLanded = false;
     private ParticleSystem landingParticles;
     private Transform playerTransform;
     private Rigidbody2D rb;
 
+    private Vector2 fallDirection;
+
     private void Awake()
     {
-        // Get the Rigidbody2D component.
         rb = GetComponent<Rigidbody2D>();
 
-        // Find the child particle system and make sure it's not playing initially.
         landingParticles = GetComponentInChildren<ParticleSystem>();
         if (landingParticles != null)
-        {
             landingParticles.Stop(true);
-        }
     }
 
     private void Start()
     {
-        // Give the meteor a random rotation on the Z-axis when it spawns.
-        transform.rotation = Quaternion.Euler(0, 0, Random.Range(0f, 360f));
+        // Choose a random angle roughly downward (270° ± 15°)
+        float angleDegrees = Random.Range(-15f, 15f) + 270f;
+        float angleRadians = angleDegrees * Mathf.Deg2Rad;
 
-        // Find the player object by tag to get a reference for cleanup logic.
+        // Calculate fall direction vector
+        fallDirection = new Vector2(Mathf.Cos(angleRadians), Mathf.Sin(angleRadians));
+
+        // Rotate meteor visually to match fall angle
+        transform.rotation = Quaternion.Euler(0, 0, angleDegrees);
+
+        // Find player by tag
         GameObject playerObject = GameObject.FindWithTag("Player");
         if (playerObject != null)
-        {
             playerTransform = playerObject.transform;
-        }
 
-        // Set the meteor's initial position
+        // Start high up
         transform.position = new Vector2(transform.position.x, 50f);
 
-        // Predict the landing spot as soon as the meteor is spawned
+        // Predict where it will land along fallDirection
         PredictLandingSpot();
     }
 
     private void Update()
     {
-        // Check for player distance and destroy the meteor if it has landed and the player is far away
+        // Cleanup if landed and player far away
         if (hasLanded && playerTransform != null)
         {
             float distance = Vector3.Distance(transform.position, playerTransform.position);
             if (distance > cleanupRadius)
-            {
                 Destroy(gameObject);
-            }
         }
     }
 
     private void PredictLandingSpot()
     {
-        // Fire a raycast down to find the ground
         int groundLayer = LayerMask.GetMask("groundLayer");
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, Mathf.Infinity, groundLayer);
+
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, fallDirection, Mathf.Infinity, groundLayer);
 
         if (hit.collider != null)
         {
             targetPosition = hit.point;
 
-            // Only instantiate the warning sprite if the prefab is assigned
             if (warningSpritePrefab != null)
             {
-                // Instantiate the warning sprite with an offset to appear above the ground.
                 Vector3 warningPos = new Vector3(targetPosition.x, targetPosition.y + warningSpriteOffset, 0);
                 warningSpriteInstance = Instantiate(warningSpritePrefab, warningPos, Quaternion.identity);
                 StartCoroutine(HoverWarningSprite());
             }
 
-            // Wait for the warning time before starting the fall.
-            // The meteor remains stationary until this coroutine finishes.
             StartCoroutine(StartFallAfterDelay());
         }
         else
         {
-            // If no ground is found, destroy the meteor
             Debug.LogWarning("Meteor could not find ground. Destroying itself.");
             Destroy(gameObject);
         }
@@ -114,20 +113,28 @@ public class Meteor : MonoBehaviour
 
     private IEnumerator StartFallAfterDelay()
     {
-        // Wait for the specified warning time
+        // Start warning shake if player is near the predicted landing spot
+        if (playerTransform != null && Vector2.Distance(targetPosition, playerTransform.position) <= warningShakeRadius)
+        {
+            StartCoroutine(WarningShakeRoutine());
+        }
+
         yield return new WaitForSeconds(warningTime);
-        
-        // The correct syntax for setting the body type is RigidbodyType2D.Dynamic.
+
         if (rb != null)
         {
             rb.bodyType = RigidbodyType2D.Dynamic;
-            rb.gravityScale = 1.0f; // Ensure gravity is applied
+            rb.gravityScale = 0f; // Disable gravity, we'll control velocity manually
+            rb.linearVelocity = fallDirection * fallSpeed;
         }
+
         isFalling = true;
     }
 
     private IEnumerator HoverWarningSprite()
     {
+        if (warningSpriteInstance == null) yield break;
+
         Vector3 startPos = warningSpriteInstance.transform.position;
         float timer = 0f;
         float hoverSpeed = 5f;
@@ -142,60 +149,72 @@ public class Meteor : MonoBehaviour
         }
     }
 
-    // OnCollisionEnter2D is now the single source of truth for all impact logic.
+    private IEnumerator WarningShakeRoutine()
+    {
+        float timer = 0f;
+
+        while (timer < warningShakeDuration)
+        {
+            timer += Time.deltaTime;
+            // Shake intensity ramps up and down smoothly
+            float intensity = Mathf.Sin((timer / warningShakeDuration) * Mathf.PI);
+            CameraShake.Instance?.Shake(0.1f, warningShakeMagnitude * intensity);
+            yield return null;
+        }
+    }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // Check for player collision first, before any other logic.
+        if (hasLanded)
+            return;
+
         if (collision.gameObject.CompareTag("Player"))
         {
-            Debug.Log("Meteor hit player. Triggering death.");
-            if (DeathManager.Instance != null)
+            // Kill player only if meteor is falling
+            if (isFalling)
             {
-                DeathManager.Instance.TriggerDeath();
+                if (DeathManager.Instance != null)
+                    DeathManager.Instance.TriggerDeath();
             }
         }
-
-        // If the meteor has already landed (e.g., this is a second collision), ignore it.
-        // This must be checked after the player collision check to ensure the player is always killed.
-        if (hasLanded)
+        else
         {
-            return;
+            // If meteor hits ground or other surface, freeze it and play effects
+            if (((1 << collision.gameObject.layer) & LayerMask.GetMask("groundLayer")) != 0)
+            {
+                LandMeteor();
+            }
         }
-        
-        // The meteor has now landed, so execute the impact sequence.
+    }
+
+    private void LandMeteor()
+    {
         isFalling = false;
         hasLanded = true;
-        
-        Debug.Log("Collision detected with: " + collision.gameObject.name);
 
-        // The correct syntax for setting the body type is RigidbodyType2D.Kinematic.
         if (rb != null)
         {
             rb.linearVelocity = Vector2.zero;
             rb.angularVelocity = 0f;
             rb.bodyType = RigidbodyType2D.Kinematic;
         }
-        
-        // Disable the collider to prevent the landed meteor from affecting other objects.
+
         Collider2D meteorCollider = GetComponent<Collider2D>();
         if (meteorCollider != null)
-        {
             meteorCollider.enabled = false;
-        }
-        
-        // Trigger the screenshake
-        CameraShake.Instance.ShakeCamera(cameraShakeDuration, cameraShakeMagnitude);
 
-        // Destroy the warning sprite
+        // Destroy warning sprite
         if (warningSpriteInstance != null)
-        {
             Destroy(warningSpriteInstance);
-        }
 
-        // Play the particle effect.
+        // Play landing particles
         if (landingParticles != null)
-        {
             landingParticles.Play(true);
+
+        // Camera shake on impact if near player
+        if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= warningShakeRadius)
+        {
+            CameraShake.Instance?.Shake(cameraShakeDuration, cameraShakeMagnitude);
         }
     }
 }

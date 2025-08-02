@@ -1,54 +1,36 @@
-// CameraShake.cs
-// Place this script on your Main Camera.
-// It uses a singleton pattern to be easily accessible from other scripts.
-//
-// The 'using' clauses below must be at the very top of the file to prevent the CS1529 error.
 using UnityEngine;
-using System.Collections;
+using Unity.Cinemachine;
 
 public class CameraShake : MonoBehaviour
 {
-    // Singleton instance
-    public static CameraShake Instance { get; private set; }
+    public static CameraShake Instance;
 
-    private Vector3 initialPosition;
+    [Header("Impulse Settings")]
+    public CinemachineImpulseSource impulseSource;
 
     private void Awake()
     {
         if (Instance == null)
-        {
             Instance = this;
+        else
+            Destroy(gameObject);
+    }
+
+    /// <summary>
+    /// Trigger a camera shake with given magnitude.
+    /// Duration is controlled by the impulse profile.
+    /// </summary>
+    /// <param name="duration">Not used here - control via profile</param>
+    /// <param name="magnitude">Shake intensity (amplitude)</param>
+    public void Shake(float duration = 0.1f, float magnitude = 0.2f)
+    {
+        if (impulseSource != null)
+        {
+            impulseSource.GenerateImpulse(magnitude);
         }
         else
         {
-            Destroy(gameObject);
+            Debug.LogWarning("CameraShake: impulseSource is not assigned.");
         }
-
-        initialPosition = transform.localPosition;
-    }
-
-    public void ShakeCamera(float duration, float magnitude)
-    {
-        StartCoroutine(Shake(duration, magnitude));
-    }
-
-    private IEnumerator Shake(float duration, float magnitude)
-    {
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            float x = Random.Range(-1f, 1f) * magnitude;
-            float y = Random.Range(-1f, 1f) * magnitude;
-
-            transform.localPosition = new Vector3(initialPosition.x + x, initialPosition.y + y, initialPosition.z);
-
-            elapsed += Time.deltaTime;
-
-            yield return null;
-        }
-
-        // Reset the camera's position back to its original spot after shaking
-        transform.localPosition = initialPosition;
     }
 }
