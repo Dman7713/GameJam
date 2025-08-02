@@ -6766,7 +6766,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 580.588, y: -329.94}
+  m_AnchoredPosition: {x: 752.0001, y: -314}
   m_SizeDelta: {x: 30.694, y: 19.509}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &824460976
@@ -11856,7 +11856,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 580, y: -435}
+  m_AnchoredPosition: {x: 752, y: -391}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1040841735
@@ -11931,7 +11931,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TrackerSettings:
     BindingMode: 4
-    PositionDamping: {x: 1, y: 1, z: 1}
+    PositionDamping: {x: 0.5, y: 0.5, z: 0.5}
     AngularDampingMode: 0
     RotationDamping: {x: 1, y: 1, z: 1}
     QuaternionDamping: 1
@@ -12174,7 +12174,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 499, y: -308}
+  m_AnchoredPosition: {x: 670.412, y: -292.06}
   m_SizeDelta: {x: 36.5042, y: 18.89}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1133601934
@@ -12573,7 +12573,7 @@ WheelJoint2D:
   m_Anchor: {x: -0.4678367, y: -0.37399998}
   m_ConnectedAnchor: {x: 0, y: 0}
   m_Suspension:
-    m_DampingRatio: 0.3
+    m_DampingRatio: 0.6
     m_Frequency: 7
     m_Angle: 90
   m_UseMotor: 0
@@ -12598,7 +12598,7 @@ WheelJoint2D:
   m_Anchor: {x: -0.088579156, y: -0.37330672}
   m_ConnectedAnchor: {x: 0, y: 0}
   m_Suspension:
-    m_DampingRatio: 0.3
+    m_DampingRatio: 0.6
     m_Frequency: 7
     m_Angle: 90
   m_UseMotor: 0
@@ -12794,7 +12794,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.67, y: 0.7}
+  m_Size: {x: 0.65, y: 0.7}
   m_EdgeRadius: 0
 --- !u!114 &1337959973
 MonoBehaviour:
@@ -12830,10 +12830,6 @@ MonoBehaviour:
   popupFadeDuration: 1.5
   maxPopupRotationAngle: 10
   comboResetDelay: 1.5
-  perfectLandingMinSpeed: 6
-  perfectLandingMaxSpeed: 20
-  cleanLandingMinSpeed: 4
-  cleanLandingMaxSpeed: 6
 --- !u!1 &1407242514
 GameObject:
   m_ObjectHideFlags: 0
@@ -12869,7 +12865,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 660.8, y: -308}
+  m_AnchoredPosition: {x: 832.21204, y: -292.06}
   m_SizeDelta: {x: 76.0223, y: 39.3396}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1407242516
@@ -12961,7 +12957,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 580.588, y: -279.258}
+  m_AnchoredPosition: {x: 752, y: -263.318}
   m_SizeDelta: {x: 30.6952, y: 20.91}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1438222769
