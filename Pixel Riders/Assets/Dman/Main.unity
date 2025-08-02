@@ -5495,7 +5495,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &559392754
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11926,7 +11926,7 @@ Transform:
   m_GameObject: {fileID: 1070850720}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 33.49, y: 130.32193, z: -10}
+  m_LocalPosition: {x: 33.49, y: 124.82, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -12055,7 +12055,7 @@ Transform:
   m_GameObject: {fileID: 1077609246}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 25.9813, y: 116.772736, z: 0}
+  m_LocalPosition: {x: 25.9813, y: 119.82081, z: 0}
   m_LocalScale: {x: 17.836447, y: 17.836447, z: 17.836447}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -12251,7 +12251,7 @@ Transform:
   m_GameObject: {fileID: 1185506159}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 23.1597, y: 119.82663, z: 0}
+  m_LocalPosition: {x: 23.1597, y: 122.8747, z: 0}
   m_LocalScale: {x: 16.533434, y: 20.815933, z: 50000}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -12478,7 +12478,7 @@ Transform:
   m_GameObject: {fileID: 1337959964}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 33.49, y: 130.32193, z: 0}
+  m_LocalPosition: {x: 33.49, y: 124.82, z: 0}
   m_LocalScale: {x: 3.5857136, y: 3.5857136, z: 3.5857136}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -13354,7 +13354,7 @@ HingeJoint2D:
   m_BreakAction: 3
   m_AutoConfigureConnectedAnchor: 1
   m_Anchor: {x: 0.0044738934, y: -0.11701578}
-  m_ConnectedAnchor: {x: -0.29232, y: -0.035707396}
+  m_ConnectedAnchor: {x: -0.29232, y: -0.035709523}
   m_UseConnectedAnchor: 1
   m_UseMotor: 0
   m_Motor:
@@ -13649,7 +13649,7 @@ Transform:
   m_GameObject: {fileID: 1629933319}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 33.49, y: 130.32193, z: -10}
+  m_LocalPosition: {x: 33.49, y: 124.82, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -13814,7 +13814,7 @@ Transform:
   m_GameObject: {fileID: 1670913561}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 32.3, y: 124.21193, z: 190}
+  m_LocalPosition: {x: 32.3, y: 127.26, z: 190}
   m_LocalScale: {x: 18.585154, y: 23.155901, z: 27485.615}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -14226,7 +14226,7 @@ Transform:
   m_GameObject: {fileID: 1778337934}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 25.35, y: 118.26193, z: 0}
+  m_LocalPosition: {x: 25.35, y: 121.310005, z: 0}
   m_LocalScale: {x: 18.337048, y: 18.337048, z: 18.337048}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -14588,7 +14588,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!68 &2051436523
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -16317,11 +16317,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1684622453706201141, guid: acb5ea2709dadea46b52b150d54af7ee, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 20.21
+      value: 16.58
       objectReference: {fileID: 0}
     - target: {fileID: 1684622453706201141, guid: acb5ea2709dadea46b52b150d54af7ee, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 127.94194
+      value: 120.453
       objectReference: {fileID: 0}
     - target: {fileID: 1684622453706201141, guid: acb5ea2709dadea46b52b150d54af7ee, type: 3}
       propertyPath: m_LocalPosition.z
@@ -16354,6 +16354,10 @@ PrefabInstance:
     - target: {fileID: 1684622453706201141, guid: acb5ea2709dadea46b52b150d54af7ee, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6334973765065088741, guid: acb5ea2709dadea46b52b150d54af7ee, type: 3}
+      propertyPath: m_SortingOrder
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
