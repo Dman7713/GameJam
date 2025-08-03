@@ -5475,7 +5475,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 25c2ce11b4f34e247a7e9191ab3f0901, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.438
+  m_Volume: 0.114
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -6918,7 +6918,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.212
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -12883,11 +12883,11 @@ MonoBehaviour:
   frontTireGroundCheck: {fileID: 795997258}
   backTireGroundCheck: {fileID: 597259798}
   groundCheckRadius: 0.5
-  _idleAudioClip: {fileID: 8300000, guid: 2924e9fb353307d41a5a1ab817090a48, type: 3}
-  _driveAudioClip: {fileID: 8300000, guid: 6ebb7ff05f58ee047997932e39094cbc, type: 3}
-  _reverseAudioClip: {fileID: 8300000, guid: c0d9e3b9901bbe7479dfd21a1ee6c8b8, type: 3}
-  _groundHitAudioClip: {fileID: 8300000, guid: 2924e9fb353307d41a5a1ab817090a48, type: 3}
-  _deathAudioClip: {fileID: 8300000, guid: 6ebb7ff05f58ee047997932e39094cbc, type: 3}
+  _idleAudioClip: {fileID: 0}
+  _driveAudioClip: {fileID: 0}
+  _reverseAudioClip: {fileID: 0}
+  _groundHitAudioClip: {fileID: 0}
+  _deathAudioClip: {fileID: 0}
 --- !u!82 &1337959971
 AudioSource:
   m_ObjectHideFlags: 0
@@ -16644,6 +16644,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Meteor
       objectReference: {fileID: 0}
+    - target: {fileID: 1118020191029471674, guid: 347dd3f0a50817e41b5b5e752a905aa3, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5130330151170519602, guid: 347dd3f0a50817e41b5b5e752a905aa3, type: 3}
       propertyPath: m_Color.b
       value: 0.508989
@@ -16830,6 +16834,10 @@ PrefabInstance:
     - target: {fileID: 2303446640740268439, guid: 26ba3825867947c4c834e42803317837, type: 3}
       propertyPath: m_Name
       value: Warning
+      objectReference: {fileID: 0}
+    - target: {fileID: 2303446640740268439, guid: 26ba3825867947c4c834e42803317837, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5707942063902915339, guid: 26ba3825867947c4c834e42803317837, type: 3}
       propertyPath: m_LocalPosition.x
