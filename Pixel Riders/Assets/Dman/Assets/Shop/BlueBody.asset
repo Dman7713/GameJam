@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bec87fbb52bc34a40a1a66dcb7e6bf09, type: 3}
   m_Name: BlueBody
   m_EditorClassIdentifier: 
-  spriteName: BlueBodySprite
+  spriteName: Blue Shirt
   bodySprite: {fileID: 21300000, guid: f754c4a180fcbcd41876f4bc85f6cf24, type: 3}
   cost: 50
   isDefault: 0

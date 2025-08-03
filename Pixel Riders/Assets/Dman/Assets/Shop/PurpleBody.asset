@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bec87fbb52bc34a40a1a66dcb7e6bf09, type: 3}
   m_Name: PurpleBody
   m_EditorClassIdentifier: 
-  spriteName: PurpleBodySprite
+  spriteName: Purple Shirt
   bodySprite: {fileID: 21300000, guid: 5326eeda93f017341aa02110d3d54585, type: 3}
   cost: 50
   isDefault: 0

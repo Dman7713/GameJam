@@ -1,12 +1,12 @@
 using UnityEngine;
-using TMPro; // Important: Add this to use TextMeshProUGUI
+using TMPro;
 
 /// <summary>
 /// A simple controller for a collectible coin.
 /// This script handles the coin's hovering animation,
 /// collision detection, and plays a particle and sound effect.
-/// It also manages a static coin counter and updates a UI text element
-/// directly, without needing to communicate with a separate script.
+/// It now directly communicates with the DataManager to update the
+/// player's coin count.
 /// </summary>
 public class CoinController : MonoBehaviour
 {
@@ -16,44 +16,25 @@ public class CoinController : MonoBehaviour
     public float hoverSpeed = 1f;
     [Tooltip("The maximum distance the coin moves up and down from its starting position.")]
     public float hoverAmplitude = 0.2f;
-    
+
     [Header("Coin Collection Settings")]
     [Tooltip("The tag of the GameObject that can collect the coin (e.g., 'Player').")]
     public string playerTag = "Player";
-    
+
     [Header("Effects")]
     [Tooltip("The particle system prefab to spawn when the coin is collected.")]
     public GameObject collectEffectPrefab;
-    
+
     [Header("Audio Settings")]
     [Tooltip("The AudioSource component on this GameObject.")]
     public AudioSource collectAudioSource;
     [Tooltip("The sound effect to play when the coin is collected.")]
     public AudioClip collectSoundClip;
 
-    [Header("UI Counter Settings")]
-    [Tooltip("The name of the top-level parent GameObject (e.g., 'ScoreCanvas').")]
-    public string scoreCanvasParentName = "ScoreCanvas";
-    [Tooltip("The name of the child GameObject that holds the coin display text (e.g., 'CoinDisplay').")]
-    public string coinDisplayChildName = "CoinDisplay";
-    
-    [Tooltip("The format string for the coin counter text. Use {0} as a placeholder for the count.")]
-    public string coinTextFormat = "Coins: {0}";
-
-    [Header("Data Persistence")]
-    [Tooltip("The PlayerPrefs key used to save and load the coin count.")]
-    public string coinPlayerPrefsKey = "CoinsCollected";
-
-    // --- Private and Static variables ---
+    // --- Private variables ---
     private Vector3 startPosition;
     private bool isCollected = false;
-    
-    // A static variable to store the total number of coins collected across all instances.
-    private static int coinsCollected = 0;
-    
-    // A static reference to the TextMeshProUGUI object to display the coin count.
-    private static TextMeshProUGUI coinText;
-    
+
     /// <summary>
     /// Called when the script instance is being loaded.
     /// Used to initialize the coin's state.
@@ -62,27 +43,6 @@ public class CoinController : MonoBehaviour
     {
         // Store the coin's starting position for the hover animation.
         startPosition = transform.position;
-        
-        // This check will run every time a new scene is loaded, ensuring the UI is found.
-        if (coinText == null)
-        {
-            // Find and set the UI text element.
-            GameObject scoreCanvas = GameObject.Find(scoreCanvasParentName);
-            if (scoreCanvas != null)
-            {
-                Transform coinDisplayTransform = scoreCanvas.transform.Find(coinDisplayChildName);
-                if (coinDisplayTransform != null)
-                {
-                    coinText = coinDisplayTransform.GetComponentInChildren<TextMeshProUGUI>();
-                }
-            }
-
-            // Load the coin count from PlayerPrefs.
-            coinsCollected = PlayerPrefs.GetInt(coinPlayerPrefsKey, 0);
-        }
-        
-        // Update the UI on start to show the loaded count.
-        UpdateCoinDisplay();
     }
 
     /// <summary>
@@ -113,10 +73,16 @@ public class CoinController : MonoBehaviour
             isCollected = true;
 
             // --- UI and Data Persistence Logic ---
-            // Increment the static coin count and save it to PlayerPrefs.
-            coinsCollected++;
-            PlayerPrefs.SetInt(coinPlayerPrefsKey, coinsCollected);
-            UpdateCoinDisplay();
+            // We are no longer managing a static coin count. Instead, we
+            // add a coin directly to the DataManager.
+            if (DataManager.Instance != null)
+            {
+                DataManager.Instance.AddCoins(1);
+            }
+            else
+            {
+                Debug.LogError("DataManager.Instance is null! Cannot add coins.");
+            }
 
             // Hide the coin's sprite and collider immediately.
             Renderer coinRenderer = GetComponent<Renderer>();
@@ -166,17 +132,6 @@ public class CoinController : MonoBehaviour
 
             // The coin GameObject is destroyed after the longest effect (audio or particles) is done.
             Destroy(gameObject, destroyDelay + 0.1f);
-        }
-    }
-    
-    /// <summary>
-    /// Updates the UI text with the current coin count.
-    /// </summary>
-    private void UpdateCoinDisplay()
-    {
-        if (coinText != null)
-        {
-            coinText.text = string.Format(coinTextFormat, coinsCollected);
         }
     }
 }

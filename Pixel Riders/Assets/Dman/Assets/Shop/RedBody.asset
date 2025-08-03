@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bec87fbb52bc34a40a1a66dcb7e6bf09, type: 3}
   m_Name: RedBody
   m_EditorClassIdentifier: 
-  spriteName: RedBodySprite
+  spriteName: Red Shirt
   bodySprite: {fileID: 21300000, guid: 0dab5c66b989ea942952265b6e735ca8, type: 3}
   cost: 0
   isDefault: 1

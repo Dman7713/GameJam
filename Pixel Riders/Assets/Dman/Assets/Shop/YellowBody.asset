@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bec87fbb52bc34a40a1a66dcb7e6bf09, type: 3}
   m_Name: YellowBody
   m_EditorClassIdentifier: 
-  spriteName: YellowBodySprite
+  spriteName: Yellow Shirt
   bodySprite: {fileID: 21300000, guid: 243543e65a0b35646ba91c67472e25c1, type: 3}
   cost: 50
   isDefault: 0

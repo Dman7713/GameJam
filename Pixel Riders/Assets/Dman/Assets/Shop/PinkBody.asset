@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bec87fbb52bc34a40a1a66dcb7e6bf09, type: 3}
   m_Name: PinkBody
   m_EditorClassIdentifier: 
-  spriteName: PinkBodySprite
+  spriteName: Pink Shirt
   bodySprite: {fileID: 21300000, guid: cfc70f6323488db47b00a4b82904ece2, type: 3}
   cost: 50
   isDefault: 0

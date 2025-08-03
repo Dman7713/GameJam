@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bec87fbb52bc34a40a1a66dcb7e6bf09, type: 3}
   m_Name: OrangeBody
   m_EditorClassIdentifier: 
-  spriteName: OrangeBodySprite
+  spriteName: Orange Shirt
   bodySprite: {fileID: 21300000, guid: 8f6524718756e9a438830483b352adac, type: 3}
   cost: 50
   isDefault: 0
