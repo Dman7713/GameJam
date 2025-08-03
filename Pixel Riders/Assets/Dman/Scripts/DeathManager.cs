@@ -1,22 +1,28 @@
+// DeathManager.cs
 using UnityEngine;
 using System.Collections;
 using TMPro;
 
+/// <summary>
+/// This script manages the player's death sequence.
+/// It is designed to be attached directly to the head GameObject.
+/// </summary>
 public class DeathManager : MonoBehaviour
 {
     public static DeathManager Instance;
 
-    [SerializeField] private Transform bikeRoot;
-    [SerializeField] private Transform head; 
-    [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private Transform bikeRoot; // Still useful for other logic if needed, but not for head unparenting
     [SerializeField] private StuntManager stuntManager;
     [SerializeField] private GameObject _scoreUIObject;
+    [SerializeField] private LayerMask groundLayer;
+
+    [Header("Particles")]
+    [SerializeField] private ParticleSystem _headPopParticles;
 
     [Header("Death UI")]
     [SerializeField] private GameObject _deathCanvas;
     [SerializeField] private TextMeshProUGUI _deathText;
     [SerializeField] private TextMeshProUGUI _finalScoreText;
-    
     [SerializeField] private TextMeshProUGUI _highScoreText;
     
     private HighScoreDisplay _deathHighScoreDisplay;
@@ -47,38 +53,50 @@ public class DeathManager : MonoBehaviour
         }
     }
     
+    /// <summary>
+    /// Detects collisions with the ground to trigger the death sequence.
+    /// This method is now on the DeathManager script itself, which should be attached to the head.
+    /// </summary>
+    /// <param name="collision">The collision data.</param>
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (hasDied) return;
-
-        if (((1 << collision.gameObject.layer) & groundLayer) != 0)
+        // Check if the collided object is on the ground layer and the player hasn't died yet.
+        if (!hasDied && ((1 << collision.gameObject.layer) & groundLayer) != 0)
         {
             Debug.Log("Driver's head hit the ground!");
             TriggerDeath();
         }
     }
 
+    /// <summary>
+    /// Triggers the player's death sequence, including unparenting the head and playing particles.
+    /// </summary>
     public void TriggerDeath()
     {
         if (hasDied) return;
 
         hasDied = true;
+
+        // Play the particle effect at the head's position.
+        if (_headPopParticles != null)
+        {
+            _headPopParticles.transform.position = this.transform.position;
+            _headPopParticles.Play();
+        }
+
         UnparentAndEnableRagdoll();
         HandlePlayerDeath();
     }
 
     private void UnparentAndEnableRagdoll()
     {
-        if (head == null)
-        {
-            Debug.LogError("Head is not assigned in DeathManager!");
-            return;
-        }
+        // Unparent the head (this GameObject) so it can move independently.
+        this.transform.SetParent(null);
 
-        head.SetParent(null);
-        Rigidbody2D rb = head.GetComponent<Rigidbody2D>();
+        // Ensure the head has a Rigidbody2D to enable physics.
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
         if (rb == null)
-            rb = head.gameObject.AddComponent<Rigidbody2D>();
+            rb = gameObject.AddComponent<Rigidbody2D>();
 
         rb.bodyType = RigidbodyType2D.Dynamic;
         rb.simulated = true;
@@ -118,12 +136,10 @@ public class DeathManager : MonoBehaviour
             {
                 int currentScore = StuntManager.Score;
                 
-                // New Debug Log: See what the current score is right before the check
                 Debug.Log($"DeathManager: Current score from StuntManager is {currentScore}");
 
                 int highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
                 
-                // New Debug Log: See what the high score is being read as
                 Debug.Log($"DeathManager: High score from PlayerPrefs is {highScore}");
 
                 if (currentScore > highScore)
