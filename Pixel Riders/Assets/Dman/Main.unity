@@ -14409,13 +14409,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da23c837d9a4f4e4a9950d10c1efbfe7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bikeRoot: {fileID: 1337959966}
   stuntManager: {fileID: 1337959974}
   _scoreUIObject: {fileID: 1538455755}
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
-  _headPopParticles: {fileID: 0}
+  _headPopParticles: {fileID: 928975810}
+  _particleSize: 0.1
   _deathCanvas: {fileID: 899760659}
   _deathText: {fileID: 759007342}
   _finalScoreText: {fileID: 641969429}
