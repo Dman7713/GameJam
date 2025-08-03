@@ -12754,11 +12754,11 @@ MonoBehaviour:
   frontTireGroundCheck: {fileID: 795997258}
   backTireGroundCheck: {fileID: 597259798}
   groundCheckRadius: 0.5
-  _idleAudioClip: {fileID: 8300000, guid: 2924e9fb353307d41a5a1ab817090a48, type: 3}
-  _driveAudioClip: {fileID: 8300000, guid: 6ebb7ff05f58ee047997932e39094cbc, type: 3}
-  _reverseAudioClip: {fileID: 8300000, guid: c0d9e3b9901bbe7479dfd21a1ee6c8b8, type: 3}
-  _groundHitAudioClip: {fileID: 8300000, guid: 2924e9fb353307d41a5a1ab817090a48, type: 3}
-  _deathAudioClip: {fileID: 8300000, guid: 6ebb7ff05f58ee047997932e39094cbc, type: 3}
+  _idleAudioClip: {fileID: 0}
+  _driveAudioClip: {fileID: 0}
+  _reverseAudioClip: {fileID: 0}
+  _groundHitAudioClip: {fileID: 0}
+  _deathAudioClip: {fileID: 0}
 --- !u!82 &1337959971
 AudioSource:
   m_ObjectHideFlags: 0
@@ -16497,6 +16497,12 @@ MonoBehaviour:
   player: {fileID: 1337959966}
   spawnRadius: 194
   chunkDespawnBuffer: 1
+  instructions: Add Empty Gameobject called sprite anchor inside the trap, the anchor
+    will match the position of the ground, if you do not add one, it will default
+    to the trap's center
+  trapList: []
+  minimumTrapsPerChunk: 0
+  maximumTrapsPerChunk: 10
 --- !u!1001 &1170525519908766445
 PrefabInstance:
   m_ObjectHideFlags: 0
