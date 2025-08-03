@@ -11,13 +11,14 @@ public class DeathManager : MonoBehaviour
 {
     public static DeathManager Instance;
 
-    [SerializeField] private Transform bikeRoot; // Still useful for other logic if needed, but not for head unparenting
     [SerializeField] private StuntManager stuntManager;
     [SerializeField] private GameObject _scoreUIObject;
     [SerializeField] private LayerMask groundLayer;
 
     [Header("Particles")]
     [SerializeField] private ParticleSystem _headPopParticles;
+    // New field to control the size of the particles.
+    [SerializeField] private float _particleSize = 1.0f;
 
     [Header("Death UI")]
     [SerializeField] private GameObject _deathCanvas;
@@ -37,6 +38,18 @@ public class DeathManager : MonoBehaviour
         else
             Destroy(gameObject);
 
+        // Check if the necessary components are present on the head GameObject.
+        if (GetComponent<Rigidbody2D>() == null || GetComponent<Collider2D>() == null)
+        {
+            Debug.LogError("DeathManager script requires a Rigidbody2D and Collider2D on the same GameObject to detect collisions. Make sure the head has these components.");
+        }
+        
+        // Log a message if a joint is found, as it will be destroyed on death.
+        if (GetComponent<Joint2D>() != null)
+        {
+            Debug.Log("DeathManager found a Joint2D on the head. This joint will be destroyed on death to unattach the head.");
+        }
+
         if (_deathCanvas != null)
             _deathCanvas.SetActive(false);
 
@@ -55,7 +68,7 @@ public class DeathManager : MonoBehaviour
     
     /// <summary>
     /// Detects collisions with the ground to trigger the death sequence.
-    /// This method is now on the DeathManager script itself, which should be attached to the head.
+    /// This method is on the DeathManager script itself, which should be attached to the head.
     /// </summary>
     /// <param name="collision">The collision data.</param>
     private void OnCollisionEnter2D(Collision2D collision)
@@ -80,7 +93,13 @@ public class DeathManager : MonoBehaviour
         // Play the particle effect at the head's position.
         if (_headPopParticles != null)
         {
-            _headPopParticles.transform.position = this.transform.position;
+            // Unparent the particle system from the head so it doesn't move with it.
+            _headPopParticles.transform.SetParent(null);
+
+            // Set the particle size to the desired value.
+            var mainModule = _headPopParticles.main;
+            mainModule.startSize = _particleSize;
+
             _headPopParticles.Play();
         }
 
@@ -90,11 +109,20 @@ public class DeathManager : MonoBehaviour
 
     private void UnparentAndEnableRagdoll()
     {
+        // Find and destroy all Joint2D components on this GameObject to sever the physical connection.
+        Joint2D[] joints = GetComponents<Joint2D>();
+        foreach (Joint2D joint in joints)
+        {
+            Destroy(joint);
+        }
+
         // Unparent the head (this GameObject) so it can move independently.
         this.transform.SetParent(null);
 
-        // Ensure the head has a Rigidbody2D to enable physics.
+        // Get the Rigidbody2D component which should already be on the head.
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        
+        // This check is now mostly for safety, as Awake() should have caught this.
         if (rb == null)
             rb = gameObject.AddComponent<Rigidbody2D>();
 
