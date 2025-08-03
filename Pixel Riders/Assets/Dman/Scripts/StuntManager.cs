@@ -1,7 +1,8 @@
 using UnityEngine;
 using TMPro;
 using System.Collections;
-using Unity.VisualScripting;
+using System;
+using Random = UnityEngine.Random;
 
 public class StuntManager : MonoBehaviour
 {
@@ -181,7 +182,6 @@ public class StuntManager : MonoBehaviour
         RectTransform canvasRect = uiCanvas.GetComponent<RectTransform>();
         RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, new Vector2(Screen.width * 0.5f, Screen.height * 0.8f), null, out Vector2 localPos);
         RectTransform popup = Instantiate(stuntTextPrefab, uiCanvas.transform).GetComponent<RectTransform>();
-        if (popup.gameObject.IsDestroyed()) { return; }
         popup.localPosition = localPos;
         popup.localScale = Vector3.zero;
         popup.localRotation = Quaternion.identity;
@@ -199,28 +199,35 @@ public class StuntManager : MonoBehaviour
         StartCoroutine(AnimatePopup(popup, text));
     }
 
-    IEnumerator AnimatePopup(RectTransform popupRect, TextMeshProUGUI text)
-    {
+    IEnumerator AnimatePopup(RectTransform popupRect, TextMeshProUGUI text) {
         float timer = 0f;
-        while (timer < popupScaleDuration)
-        {
+        while (timer < popupScaleDuration) {
             timer += Time.deltaTime;
             float t = Mathf.SmoothStep(0f, 1f, timer / popupScaleDuration);
-            popupRect.localScale = Vector3.one * t;
+            try {
+                popupRect.localScale = Vector3.one * t;
+            }
+            catch { }
             text.alpha = t;
             yield return null;
         }
         yield return new WaitForSeconds(popupVisibleDuration);
         timer = 0f;
-        while (timer < popupFadeDuration)
-        {
+        while (timer < popupFadeDuration) {
             timer += Time.deltaTime;
             float t = timer / popupFadeDuration;
-            popupRect.localScale = Vector3.Lerp(Vector3.one, Vector3.one * 0.5f, t);
+            try {
+                popupRect.localScale = Vector3.Lerp(Vector3.one, Vector3.one * 0.5f, t);
+            }
+            catch { }
             text.alpha = 1f - t;
             yield return null;
         }
-        Destroy(popupRect.gameObject);
+
+        try {
+            Destroy(popupRect.gameObject);
+        }
+        catch {}
     }
 
     void AddScore(int points)

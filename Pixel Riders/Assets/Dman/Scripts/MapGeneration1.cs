@@ -8,12 +8,10 @@ using Unity.Cinemachine;
 public class MapGeneration1 : MonoBehaviour {
     [SerializeField] private SpriteShapeController _spriteShapeController;
 
-    [SerializeField, Range(3f, 100f)] private int _levelLength = 50;
     [SerializeField, Range(1f, 50f)] private float _xMultiplier = 2f;
     [SerializeField, Range(1f, 50f)] private float _yMultiplier = 2f;
     [SerializeField, Range(0f, 1f)] private float _curveSmoothness = 0.5f;
     [SerializeField] private float _noiseStep = 0.5f;
-    [SerializeField] private float _bottom = 10f;
     [SerializeField] private CinemachineCamera playerCamera;
 
     [Tooltip("How often the chunks update in seconds")]

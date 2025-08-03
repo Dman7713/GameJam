@@ -1,14 +1,22 @@
 ﻿using System.Collections;
 
 using System.Collections.Generic;
-
+using System.Net;
+using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 
 using UnityEngine.U2D;
+using UnityEngine.UIElements;
 
 
 
 public class InfiniteMapGenerator : MonoBehaviour {
+
+    [System.Serializable] private class TrapData {
+        public GameObject trapObject;
+        public float weight;
+        [HideInInspector] public Vector3 positionOffset;
+    }
 
     [Header("SpriteShape")]
 
@@ -17,31 +25,25 @@ public class InfiniteMapGenerator : MonoBehaviour {
 
 
     [Header("Generation Settings")]
-
     [SerializeField] private int chunkSize = 20;
-
     [SerializeField] private float xSpacing = 1.5f;
-
     [SerializeField] private float yMultiplier = 3f;
-
     [SerializeField] private float baseY = 10f;
-
-    [SerializeField] private float bottomY = 0f;
-
+    [SerializeField] private float bottomY = 0;
     [SerializeField] private float noiseStep = 0.2f;
-
     [SerializeField] private int perlinSeed = 0;
     [SerializeField, Range(0f,1f)] private float curveSmoothness;
-
-
-
     [Header("Player & Spawn Settings")]
-
     [SerializeField] private Transform player;
-
     [SerializeField] private float spawnRadius = 40f;
-
     [SerializeField] private int chunkDespawnBuffer = 1;
+
+    [Header("Traps")]
+    [Space(5)]
+    [TextArea, SerializeField] private string instructions = "Add Empty Gameobject called sprite anchor inside the trap, the anchor will match the position of the ground, if you do not add one, it will default to the trap's center";
+    [SerializeField] private List<TrapData> trapList;
+    [SerializeField] private int minimumTrapsPerChunk = 0;
+    [SerializeField] private int maximumTrapsPerChunk = 10;
 
 
 
@@ -50,26 +52,32 @@ public class InfiniteMapGenerator : MonoBehaviour {
     private HashSet<int> loadedChunkIndices = new HashSet<int>();
 
     private List<Vector3> activePoints = new List<Vector3>();
+    private Dictionary<int, List<GameObject>> activeTraps = new Dictionary<int, List<GameObject>>();
 
 
 
     private void Start() {
 
         if (perlinSeed == 0)
-
             perlinSeed = Random.Range(0, 10000);
-
-
 
         if (player == null)
 
             player = GameObject.FindGameObjectWithTag("Player").transform;
 
-
-
         spriteShapeController.spline.Clear();
 
+        foreach (TrapData trap in trapList) {
+            Transform trapObj = trap.trapObject.transform;
 
+            if (trapObj.Find("Anchor")) {
+                trap.positionOffset = -trapObj.Find("Anchor").position;
+            }
+            else {
+                Debug.LogWarning("Couldn't find anchor, using native position");
+                trap.positionOffset = Vector3.zero;
+            }
+        }
 
         // Delay generation to let camera/rendering settle
 
@@ -77,6 +85,7 @@ public class InfiniteMapGenerator : MonoBehaviour {
 
         StartCoroutine(ForceVisibilityFix());
 
+        
     }
 
 
@@ -99,6 +108,67 @@ public class InfiniteMapGenerator : MonoBehaviour {
         UpdateChunks();
     }
 
+    private TrapData ChooseTrap() {
+        List <TrapData> possibleTraps = new List<TrapData>();
+        foreach (TrapData trap in trapList) {
+            for (int i = 0; i < trap.weight; i++) {
+                possibleTraps.Add(trap);
+            }
+        }
+        return possibleTraps[Random.Range(0, possibleTraps.Count - 1)];
+    }
+    private void SpawnTrap(Vector3 position, int chunkIndex) {
+        position.Scale(transform.localScale);
+        Vector2 newPosition = (Vector2)position;
+        newPosition.y += 500;
+        RaycastHit2D rayResult = Physics2D.Raycast(newPosition, Vector2.down * 200);
+        if (rayResult == false) { return; }
+        TrapData trapData = ChooseTrap();
+        GameObject trap = Instantiate(trapData.trapObject);
+        trap.transform.position = new Vector3(rayResult.point.x, rayResult.point.y, 0);
+        float angle = Vector2.Angle(transform.right, rayResult.normal) - 90;
+        trap.transform.Rotate(new Vector3(0, 0, angle));
+        trap.transform.Translate(trapData.positionOffset);
+        trap.transform.parent = transform;
+        BindTrapToChunk(chunkIndex, trap);
+    }
+
+    private void BindTrapToChunk(int generationIndex, GameObject trap) {
+        activeTraps[generationIndex].Add(trap);
+    }
+
+    private void RemoveTraps(int chunkIndex) {
+        foreach (GameObject trap in activeTraps[chunkIndex]) {
+            Destroy(trap);
+        }
+        activeTraps.Remove(chunkIndex);
+    }
+
+    private List<bool> CreateRoulette() {
+        List<bool> roulette = new List<bool>();
+        int trapsAdded = 0;
+        for (int i = 0; i < chunkSize; i++) {
+            bool rand = Random.Range(0f, 1f) <= 0.5f;
+            roulette.Add(rand && trapsAdded <= maximumTrapsPerChunk);
+            trapsAdded += rand ? 1 : 0;
+        }
+        
+        return roulette;
+    }
+
+    private void DetermineTrapPositions(int chunkIndex) {
+        List<bool> trapLayout = CreateRoulette();
+        Debug.Log(CreateRoulette());
+        List<Vector3> chunkPositions = generatedChunks[chunkIndex];
+        activeTraps.Add(chunkIndex, new List<GameObject>());
+        for (int i = 0; i < chunkSize; i++) {
+            if (trapLayout[i] == false) continue;
+
+            SpawnTrap(chunkPositions[i], chunkIndex);
+            
+        }
+    }
+
 
 
     private void UpdateChunks() {
@@ -117,6 +187,8 @@ public class InfiniteMapGenerator : MonoBehaviour {
                 LoadChunk(i);
 
                 loadedChunkIndices.Add(i);
+
+                DetermineTrapPositions(i);
             }
         }
 
@@ -142,6 +214,7 @@ public class InfiniteMapGenerator : MonoBehaviour {
 
         }
 
+        
 
 
         foreach (int index in chunksToRemove) {
@@ -173,6 +246,7 @@ public class InfiniteMapGenerator : MonoBehaviour {
         if (generatedChunks.ContainsKey(chunkIndex)) {
 
             generatedChunks.Remove(chunkIndex);
+            RemoveTraps(chunkIndex);
 
         }
 
@@ -306,5 +380,4 @@ public class InfiniteMapGenerator : MonoBehaviour {
         Canvas.ForceUpdateCanvases();
 
     }
-
 }
