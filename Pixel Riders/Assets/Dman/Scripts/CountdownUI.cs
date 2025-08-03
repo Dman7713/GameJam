@@ -5,43 +5,37 @@ using System.Collections;
 public class CountdownUI : MonoBehaviour
 {
     [Header("References")]
-    public Image[] countdownImages; // Assign 4 images here in inspector (3,2,1,GO)
-    public StuntManager stuntManager; // Reference to the StuntManager script
+    public Image[] countdownImages;              // Assign 4 images here in inspector (3,2,1,GO)
+    public AudioSource[] countdownSounds;        // Assign 4 audio sources matching each image
+    public StuntManager stuntManager;            // Reference to the StuntManager script
 
     [Header("Settings")]
-    public float startDelay = 1f;   // Delay before countdown begins
-    public float displayTime = 1f;  // How long each image shows
-    public float fadeTime = 0.5f;   // How long fade in/out takes
+    public float startDelay = 1f;                // Delay before countdown begins
+    public float displayTime = 1f;               // How long each image shows
+    public float fadeTime = 0.5f;                // How long fade in/out takes
 
     private void Start()
     {
-        // Start the game setup
         StartGame();
     }
-    
-    // A new public method to be called from other scripts to start a new game
+
     public void StartGame()
     {
-        // Ensure the StuntManager reference is assigned
         if (stuntManager == null)
         {
             Debug.LogError("StuntManager reference is not assigned in the Inspector!");
             return;
         }
 
-        // Reset the score and game state on the StuntManager
         stuntManager.ResetScore();
-        
-        // Now, start the countdown sequence
         StartCoroutine(CountdownSequence());
     }
 
     private IEnumerator CountdownSequence()
     {
-        // Wait before starting countdown
         yield return new WaitForSeconds(startDelay);
 
-        // Disable all images at start and make transparent
+        // Initialize all images as invisible
         foreach (var img in countdownImages)
         {
             img.gameObject.SetActive(false);
@@ -53,10 +47,16 @@ public class CountdownUI : MonoBehaviour
             var img = countdownImages[i];
             img.gameObject.SetActive(true);
 
+            // Play sound for this image if assigned
+            if (countdownSounds != null && i < countdownSounds.Length && countdownSounds[i] != null)
+            {
+                countdownSounds[i].Play();
+            }
+
             // Fade in
             yield return StartCoroutine(FadeImage(img, 0f, 1f, fadeTime));
 
-            // Wait visible time
+            // Display duration
             yield return new WaitForSeconds(displayTime);
 
             // Fade out
@@ -67,7 +67,6 @@ public class CountdownUI : MonoBehaviour
 
         Debug.Log("GO! Countdown finished.");
 
-        // Once the countdown is finished, activate the StuntManager's scoring logic
         if (stuntManager != null)
         {
             stuntManager.StartStunts();
