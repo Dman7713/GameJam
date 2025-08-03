@@ -12779,6 +12779,15 @@ MonoBehaviour:
   _bikeRigidbody: {fileID: 1337959965}
   _frontTireRB: {fileID: 1441544466}
   _backTireRB: {fileID: 721341767}
+  _bikeBodyRenderer: {fileID: 1774075151}
+  _allAvailableSprites:
+  - {fileID: 11400000, guid: d28ab26aa91079a45b7648e977d6fc38, type: 2}
+  - {fileID: 11400000, guid: 438d4059d1a5013489d35c7034411860, type: 2}
+  - {fileID: 11400000, guid: 13681e1f47f3fbe40b0793741226974e, type: 2}
+  - {fileID: 11400000, guid: b1575c8265cd9824c9091420795090bf, type: 2}
+  - {fileID: 11400000, guid: 831857a3080b7074290d232dec96da26, type: 2}
+  - {fileID: 11400000, guid: 3042d9544cd50db4bbcccb160271710f, type: 2}
+  - {fileID: 11400000, guid: 17fd8d41953e84e418163c0a80c9187d, type: 2}
   scoreCanvas: {fileID: 1538455755}
   _stuntManager: {fileID: 1337959974}
   _audioSource: {fileID: 1337959971}
