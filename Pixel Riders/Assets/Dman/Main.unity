@@ -199,7 +199,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 3
   m_TargetDisplay: 0
 --- !u!224 &251965053
 RectTransform:
@@ -13027,10 +13027,10 @@ MonoBehaviour:
   frontTireGroundCheck: {fileID: 795997258}
   backTireGroundCheck: {fileID: 597259798}
   groundCheckRadius: 0.5
-  _idleAudioClip: {fileID: 8300000, guid: 2924e9fb353307d41a5a1ab817090a48, type: 3}
-  _driveAudioClip: {fileID: 8300000, guid: 6ebb7ff05f58ee047997932e39094cbc, type: 3}
+  _idleAudioClip: {fileID: 0}
+  _driveAudioClip: {fileID: 8300000, guid: c7ecb38f0f97bdf47b547a81c5f494e5, type: 3}
   _reverseAudioClip: {fileID: 8300000, guid: c0d9e3b9901bbe7479dfd21a1ee6c8b8, type: 3}
-  _groundHitAudioClip: {fileID: 8300000, guid: 2924e9fb353307d41a5a1ab817090a48, type: 3}
+  _groundHitAudioClip: {fileID: 0}
   _deathAudioClip: {fileID: 8300000, guid: 6ebb7ff05f58ee047997932e39094cbc, type: 3}
 --- !u!82 &1337959971
 AudioSource:
@@ -13044,8 +13044,8 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
-  m_PlayOnAwake: 1
-  m_Volume: 1
+  m_PlayOnAwake: 0
+  m_Volume: 0.253
   m_Pitch: 1
   Loop: 0
   Mute: 0
