@@ -1,58 +1,109 @@
 using UnityEngine;
 
-public class CoinSpawnerDebug : MonoBehaviour {
-    [Header("References")]
-    [SerializeField] private GameObject coinPrefab;
-    [SerializeField] private Transform player;
+public class CoinSpawner : MonoBehaviour
+{
+    public GameObject coinPrefab;
+    public float spawnInterval = 1f;
+    public LayerMask terrainLayer;
 
-    [Header("Spawn Settings")]
-    [SerializeField] private float minSpawnRadius = 10f;
-    [SerializeField] private float maxSpawnRadius = 50f;
-    [SerializeField] private float despawnRadius = 55f;
+    [Header("Spawn Area")]
+    public float forwardSpawnDistance = 20f;
+    public float horizontalRange = 5f;
+    public float verticalRange = 5f;
+    public float raycastHeight = 10f;
 
-    private GameObject activeCoin;
+    [Header("Air Coins")]
+    [Range(0f, 1f)] public float airCoinChance = 0.3f;
+    public float airMinHeight = 2f;
+    public float airMaxHeight = 5f;
 
-    private void Update() {
-        if (player == null) {
-            Debug.LogWarning("[CoinSpawnerDebug] No player assigned!");
-            return;
+    [Header("Chunk Settings")]
+    [Range(0f, 1f)] public float chunkSpawnChance = 0.4f; // 40% chance to spawn a chunk
+    public int minChunkSize = 3;
+    public int maxChunkSize = 8;
+    public float chunkSpacing = 1.5f;
+
+    [Header("Single Coin Settings")]
+    public int minSingles = 1;
+    public int maxSingles = 4;
+
+    private Transform player;
+
+    private void Start()
+    {
+        player = GameObject.FindGameObjectWithTag("Player").transform;
+        InvokeRepeating(nameof(SpawnCoins), 0f, spawnInterval);
+    }
+
+    void SpawnCoins()
+    {
+        bool spawnChunk = Random.value < chunkSpawnChance;
+
+        if (spawnChunk)
+        {
+            SpawnCoinChunk();
         }
-        if (coinPrefab == null) {
-            Debug.LogWarning("[CoinSpawnerDebug] No coinPrefab assigned!");
-            return;
-        }
-
-        // Despawn if too far
-        if (activeCoin != null) {
-            float d = Vector2.Distance(player.position, activeCoin.transform.position);
-            if (d > despawnRadius) {
-                Debug.Log($"[CoinSpawnerDebug] Despawning coin at distance {d:F1}");
-                Destroy(activeCoin);
-                activeCoin = null;
+        else
+        {
+            int coinCount = Random.Range(minSingles, maxSingles + 1);
+            for (int i = 0; i < coinCount; i++)
+            {
+                SpawnSingleCoin();
             }
         }
+    }
 
-        // Spawn one if missing
-        if (activeCoin == null) {
-            Vector2 spawnPos = RandomPointInAnnulus(player.position, minSpawnRadius, maxSpawnRadius);
-            Debug.Log($"[CoinSpawnerDebug] Spawning coin at {spawnPos}");
-            activeCoin = Instantiate(coinPrefab, spawnPos, Quaternion.identity);
+    void SpawnSingleCoin()
+    {
+        float spawnX = player.position.x + forwardSpawnDistance + Random.Range(-horizontalRange, horizontalRange);
+        float spawnY = player.position.y + Random.Range(-verticalRange, verticalRange);
+        Vector2 spawnOrigin = new Vector2(spawnX, spawnY + raycastHeight);
+
+        if (Random.value <= airCoinChance)
+        {
+            float airHeight = Random.Range(airMinHeight, airMaxHeight);
+            Vector2 airPos = new Vector2(spawnX, spawnY + airHeight);
+            Instantiate(coinPrefab, airPos, Quaternion.identity);
+        }
+        else
+        {
+            RaycastHit2D hit = Physics2D.Raycast(spawnOrigin, Vector2.down, raycastHeight * 2, terrainLayer);
+            if (hit.collider != null)
+            {
+                Vector2 groundPos = hit.point + Vector2.up * 0.5f;
+                Instantiate(coinPrefab, groundPos, Quaternion.identity);
+            }
         }
     }
 
-    private Vector2 RandomPointInAnnulus(Vector2 center, float inner, float outer) {
-        float t = 2 * Mathf.PI * Random.value;
-        float u = Random.value;
-        float r = Mathf.Sqrt(u * (outer*outer - inner*inner) + inner*inner);
-        return center + new Vector2(Mathf.Cos(t), Mathf.Sin(t)) * r;
-    }
+    void SpawnCoinChunk()
+    {
+        int chunkSize = Random.Range(minChunkSize, maxChunkSize + 1);
+        float startX = player.position.x + forwardSpawnDistance;
+        float baseY = player.position.y + Random.Range(-verticalRange, verticalRange);
+        bool isAir = Random.value <= airCoinChance;
 
-    private void OnDrawGizmosSelected() {
-        if (player == null) return;
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(player.position, minSpawnRadius);
-        Gizmos.DrawWireSphere(player.position, maxSpawnRadius);
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(player.position, despawnRadius);
+        for (int i = 0; i < chunkSize; i++)
+        {
+            float x = startX + i * chunkSpacing + Random.Range(-1f, 1f); // slight variation
+            float y = baseY;
+            Vector2 spawnOrigin = new Vector2(x, y + raycastHeight);
+
+            if (isAir)
+            {
+                float airHeight = Random.Range(airMinHeight, airMaxHeight);
+                Vector2 airPos = new Vector2(x, y + airHeight);
+                Instantiate(coinPrefab, airPos, Quaternion.identity);
+            }
+            else
+            {
+                RaycastHit2D hit = Physics2D.Raycast(spawnOrigin, Vector2.down, raycastHeight * 2, terrainLayer);
+                if (hit.collider != null)
+                {
+                    Vector2 groundPos = hit.point + Vector2.up * 0.5f;
+                    Instantiate(coinPrefab, groundPos, Quaternion.identity);
+                }
+            }
+        }
     }
 }
