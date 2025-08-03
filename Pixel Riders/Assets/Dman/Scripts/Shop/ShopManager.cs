@@ -23,6 +23,10 @@ public class ShopManager : MonoBehaviour
     public List<BikeBodySpriteSO> allSprites;
     private int currentDisplayIndex = 0;
 
+    // Cooldown system variables
+    public float cooldownDuration = 0.25f; // Duration in seconds to prevent accidental double clicks
+    private float lastClickTime = 0f;
+
     void Start()
     {
         if (allSprites == null || allSprites.Count == 0)
@@ -52,6 +56,11 @@ public class ShopManager : MonoBehaviour
         }
 
         currentDisplayIndex = allSprites.FindIndex(s => s != null && s.spriteName == DataManager.Instance.equippedSpriteName);
+        if (currentDisplayIndex == -1)
+        {
+            currentDisplayIndex = 0;
+        }
+
         UpdateShopUI();
     }
 
@@ -83,21 +92,17 @@ public class ShopManager : MonoBehaviour
             return;
         }
         
-        // --- ADDED DEFENSIVE CODE HERE ---
-        // Ensure the scale is not zero, which would cause the sprite to disappear.
-        // We set the Z scale to 1 to prevent it from collapsing.
+        // Ensure the scale and position are correct for the sprite renderer
         if (bikeBodyRenderer.transform.localScale.z == 0)
         {
             bikeBodyRenderer.transform.localScale = new Vector3(bikeBodyRenderer.transform.localScale.x, bikeBodyRenderer.transform.localScale.y, 1f);
         }
-        // Ensure the Z position is not too far from the camera. A common value for 2D is 0.
         if (bikeBodyRenderer.transform.position.z != 0)
         {
             Vector3 safePosition = bikeBodyRenderer.transform.position;
             safePosition.z = 0;
             bikeBodyRenderer.transform.position = safePosition;
         }
-        // --- END OF DEFENSIVE CODE ---
 
         coinText.text = "Coins: " + DataManager.Instance.coins.ToString();
         spriteNameText.text = currentSprite.spriteName;
@@ -178,6 +183,15 @@ public class ShopManager : MonoBehaviour
 
     public void NavigateLeft()
     {
+        // Check if enough time has passed since the last click
+        if (Time.time < lastClickTime + cooldownDuration)
+        {
+            return;
+        }
+
+        // Update the last click time
+        lastClickTime = Time.time;
+
         currentDisplayIndex--;
         if (currentDisplayIndex < 0)
         {
@@ -188,6 +202,15 @@ public class ShopManager : MonoBehaviour
 
     public void NavigateRight()
     {
+        // Check if enough time has passed since the last click
+        if (Time.time < lastClickTime + cooldownDuration)
+        {
+            return;
+        }
+
+        // Update the last click time
+        lastClickTime = Time.time;
+
         currentDisplayIndex++;
         if (currentDisplayIndex >= allSprites.Count)
         {

@@ -13345,8 +13345,8 @@ MonoBehaviour:
   _audioSource: {fileID: 1337959971}
   _headTransform: {fileID: 1535377192}
   _speed: 1000
-  _rotationSpeed: 300
-  _airRotationMultiplier: 6
+  _rotationSpeed: 250
+  _airRotationMultiplier: 5
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -14641,7 +14641,7 @@ MonoBehaviour:
   horizontalRange: 5
   verticalRange: 5
   raycastHeight: 10
-  airCoinChance: 0.3
+  airCoinChance: 0.5
   airMinHeight: 2
   airMaxHeight: 5
   chunkSpawnChance: 0.4
