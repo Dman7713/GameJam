@@ -9,19 +9,13 @@ public class ShopManager : MonoBehaviour
     // UI Elements
     public TextMeshProUGUI coinText;
     public TextMeshProUGUI spriteNameText;
-    // --- NEW: Public variable for the cost text ---
     public TextMeshProUGUI costText;
-
-    // Button references (the Button component is what handles the click)
+    
+    // Button references
     public Button actionButton;
-    // This is the Image component on the button that we will change the sprite of
     public Image actionButtonImage;
-
-    // Sprites for the different button states
-    public Sprite purchaseButtonSprite;
-    public Sprite equipButtonSprite;
-    public Sprite equippedButtonSprite;
-
+    public TextMeshProUGUI actionButtonText;
+    
     // The SpriteRenderer on the bike display in the shop
     public SpriteRenderer bikeBodyRenderer;
 
@@ -31,20 +25,18 @@ public class ShopManager : MonoBehaviour
 
     void Start()
     {
-        // A defensive check to ensure the list is assigned.
         if (allSprites == null || allSprites.Count == 0)
         {
             Debug.LogError("The 'All Sprites' list in the ShopManager is not assigned or is empty. Please check the Inspector.");
             return;
         }
 
-        // Final check for the DataManager instance to give a clear error message.
         if (DataManager.Instance == null)
         {
             Debug.LogError("DataManager.Instance is null! Please ensure the DataManager script is on a GameObject in your starting scene.");
             return;
         }
-        
+
         if (DataManager.Instance.equippedSpriteName == "Default" && !DataManager.Instance.ownedSprites.Any())
         {
             var defaultSprite = allSprites.FirstOrDefault(s => s != null && s.isDefault);
@@ -58,49 +50,59 @@ public class ShopManager : MonoBehaviour
                 Debug.LogError("No default sprite was found in the All Sprites list. Please set one 'isDefault' to true.");
             }
         }
-        
+
         currentDisplayIndex = allSprites.FindIndex(s => s != null && s.spriteName == DataManager.Instance.equippedSpriteName);
         UpdateShopUI();
     }
 
     private void UpdateShopUI()
     {
-        // First, perform a null check to ensure the list is valid
         if (allSprites == null || allSprites.Count == 0)
         {
             Debug.LogError("The All Sprites list is not assigned or is empty in the ShopManager!");
             return;
         }
-        
+
         if (currentDisplayIndex < 0 || currentDisplayIndex >= allSprites.Count)
         {
-            // The LogError method was missing the "Debug." prefix.
             Debug.LogError("Current display index " + currentDisplayIndex + " is out of bounds!");
             return;
         }
 
         BikeBodySpriteSO currentSprite = allSprites[currentDisplayIndex];
 
-        // Ensure the current sprite is not null before trying to use it.
         if (currentSprite == null)
         {
             Debug.LogError("The sprite at index " + currentDisplayIndex + " is a null reference!");
             return;
         }
 
-        // Check if UI references are missing
-        if (coinText == null || spriteNameText == null || bikeBodyRenderer == null || costText == null)
+        if (coinText == null || spriteNameText == null || bikeBodyRenderer == null || costText == null || actionButtonText == null)
         {
             Debug.LogError("A UI element reference is missing in the ShopManager. Please check the Inspector.");
             return;
         }
         
-        // Update basic UI elements
+        // --- ADDED DEFENSIVE CODE HERE ---
+        // Ensure the scale is not zero, which would cause the sprite to disappear.
+        // We set the Z scale to 1 to prevent it from collapsing.
+        if (bikeBodyRenderer.transform.localScale.z == 0)
+        {
+            bikeBodyRenderer.transform.localScale = new Vector3(bikeBodyRenderer.transform.localScale.x, bikeBodyRenderer.transform.localScale.y, 1f);
+        }
+        // Ensure the Z position is not too far from the camera. A common value for 2D is 0.
+        if (bikeBodyRenderer.transform.position.z != 0)
+        {
+            Vector3 safePosition = bikeBodyRenderer.transform.position;
+            safePosition.z = 0;
+            bikeBodyRenderer.transform.position = safePosition;
+        }
+        // --- END OF DEFENSIVE CODE ---
+
         coinText.text = "Coins: " + DataManager.Instance.coins.ToString();
         spriteNameText.text = currentSprite.spriteName;
         bikeBodyRenderer.sprite = currentSprite.bodySprite;
 
-        // --- NEW: Logic to display the cost or "FREE" ---
         if (currentSprite.cost == 0)
         {
             costText.text = "FREE";
@@ -109,20 +111,15 @@ public class ShopManager : MonoBehaviour
         {
             costText.text = currentSprite.cost.ToString();
         }
-        // --- END NEW LOGIC ---
 
-        // --- Logic for the Action Button's state and visual ---
         if (DataManager.Instance.ownedSprites.Contains(currentSprite.spriteName))
         {
-            // Player owns this sprite
             if (DataManager.Instance.equippedSpriteName == currentSprite.spriteName)
             {
-                // This sprite is currently equipped
+                actionButtonText.text = "EQUIPPED";
                 if (actionButtonImage != null)
                 {
-                    actionButtonImage.sprite = equippedButtonSprite;
-                    // --- NEW: Set the color to white to prevent the faded effect of a non-interactable button.
-                    actionButtonImage.color = Color.white;
+                    actionButtonImage.color = Color.blue;
                 }
                 if (actionButton != null)
                 {
@@ -131,12 +128,10 @@ public class ShopManager : MonoBehaviour
             }
             else
             {
-                // Player owns it but it's not equipped
+                actionButtonText.text = "EQUIP";
                 if (actionButtonImage != null)
                 {
-                    actionButtonImage.sprite = equipButtonSprite;
-                    // Ensure the button is not faded when it is interactable.
-                    actionButtonImage.color = Color.white;
+                    actionButtonImage.color = Color.green;
                 }
                 if (actionButton != null)
                 {
@@ -148,30 +143,28 @@ public class ShopManager : MonoBehaviour
         }
         else
         {
-            // Player does not own this sprite
-            // --- NEW: Check if the cost is 0 to show the 'Equip' button instead of 'Purchase'
             if (currentSprite.cost == 0)
             {
+                actionButtonText.text = "EQUIP";
                 if (actionButtonImage != null)
                 {
-                    actionButtonImage.sprite = equipButtonSprite;
-                    actionButtonImage.color = Color.white;
+                    actionButtonImage.color = Color.green;
                 }
                 if (actionButton != null)
                 {
                     actionButton.interactable = true;
                     actionButton.onClick.RemoveAllListeners();
-                    // --- FIXED: Call PurchaseSprite to both equip and add the free item to ownedSprites.
                     actionButton.onClick.AddListener(() => PurchaseSprite(currentSprite));
                 }
             }
             else
             {
-                // The item has a cost, so we show the 'Purchase' button
+                actionButtonText.text = "PURCHASE";
                 if (actionButtonImage != null)
                 {
-                    actionButtonImage.sprite = purchaseButtonSprite;
-                    actionButtonImage.color = Color.white;
+                    Color purchaseColor;
+                    ColorUtility.TryParseHtmlString("#FF6464", out purchaseColor);
+                    actionButtonImage.color = purchaseColor;
                 }
                 if (actionButton != null)
                 {
@@ -206,7 +199,7 @@ public class ShopManager : MonoBehaviour
     private void PurchaseSprite(BikeBodySpriteSO spriteToPurchase)
     {
         DataManager.Instance.PurchaseSprite(spriteToPurchase.spriteName, spriteToPurchase.cost);
-        EquipSprite(spriteToPurchase); // Automatically equip after purchase
+        EquipSprite(spriteToPurchase);
         UpdateShopUI();
     }
 
@@ -216,7 +209,6 @@ public class ShopManager : MonoBehaviour
         UpdateShopUI();
     }
     
-    // This is the static method your DriverController will call to update the bike's sprite
     public static void ApplyEquippedSprite(SpriteRenderer bikeBodyRenderer, List<BikeBodySpriteSO> availableSprites)
     {
         if (DataManager.Instance == null || availableSprites == null) return;
