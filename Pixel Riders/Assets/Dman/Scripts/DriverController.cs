@@ -4,9 +4,26 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-[RequireComponent(typeof(StuntManager))]
+[RequireComponent(typeof(StuntManager), typeof(AudioSource))]
 public class DriverController : MonoBehaviour
 {
+    // A nested class to handle collision detection specifically for the head object.
+    // This allows us to detect collisions on a child object and relay the information
+    // to the main DriverController script.
+    private class HeadCollisionDetector : MonoBehaviour
+    {
+        public DriverController driverController;
+
+        private void OnCollisionEnter2D(Collision2D other)
+        {
+            // Only trigger the death audio if the collision is with the "Ground"
+            if (other.gameObject.CompareTag("Ground"))
+            {
+                driverController.HandleDeath();
+            }
+        }
+    }
+
     [Header("References")]
     // Main bike components
     [SerializeField] private Rigidbody2D _bikeRigidbody;
@@ -19,6 +36,13 @@ public class DriverController : MonoBehaviour
     // Stunt manager
     [SerializeField] private StuntManager _stuntManager;
 
+    // Audio components
+    [SerializeField] private AudioSource _audioSource;
+    private AudioSource _audioSourceGroundHit;
+
+    // The player's head transform, used to detect fatal collisions
+    [SerializeField] private Transform _headTransform;
+
     [Header("Car Physics")]
     [SerializeField] private float _speed = 150f;
     [SerializeField] private float _rotationSpeed = 300f;
@@ -29,6 +53,13 @@ public class DriverController : MonoBehaviour
     [SerializeField] private Transform frontTireGroundCheck;
     [SerializeField] private Transform backTireGroundCheck;
     [SerializeField] [Range(0.01f, 0.5f)] private float groundCheckRadius = 0.1f;
+
+    [Header("Audio Clips")]
+    [SerializeField] private AudioClip _idleAudioClip;
+    [SerializeField] private AudioClip _driveAudioClip;
+    [SerializeField] private AudioClip _reverseAudioClip;
+    [SerializeField] private AudioClip _groundHitAudioClip;
+    [SerializeField] private AudioClip _deathAudioClip;
 
     // State variables
     private bool _isGrounded;
@@ -44,6 +75,23 @@ public class DriverController : MonoBehaviour
         if (_stuntManager == null)
         {
             Debug.LogError("StuntManager component not found on DriverController GameObject.");
+        }
+        
+        // Main audio source for bike sounds
+        _audioSource = GetComponent<AudioSource>();
+        if (_audioSource == null)
+        {
+            Debug.LogError("AudioSource component not found on DriverController GameObject. Please add one.");
+        }
+
+        // Create a separate audio source for one-shot sounds like ground hits and death
+        _audioSourceGroundHit = gameObject.AddComponent<AudioSource>();
+        
+        // If a head transform is assigned, add the collision detector component to it.
+        if (_headTransform != null)
+        {
+            HeadCollisionDetector detector = _headTransform.gameObject.AddComponent<HeadCollisionDetector>();
+            detector.driverController = this;
         }
     }
 
@@ -74,6 +122,14 @@ public class DriverController : MonoBehaviour
         {
             _stuntManager.enabled = true;
         }
+
+        // Play the initial idle sound on loop.
+        if (_audioSource != null && _idleAudioClip != null)
+        {
+            _audioSource.clip = _idleAudioClip;
+            _audioSource.loop = true;
+            _audioSource.Play();
+        }
     }
 
     private void FixedUpdate()
@@ -86,9 +142,12 @@ public class DriverController : MonoBehaviour
         _landedThisFrame = !_wasGroundedLastFrame && _isGrounded;
         _wasGroundedLastFrame = _isGrounded;
 
-        // The core driving physics logic.
-        HandleMovement();
-        HandleAirRotation();
+        // The core driving physics logic. Only allow movement if the player is not dead.
+        if (!_isDead)
+        {
+            HandleMovement();
+            HandleAirRotation();
+        }
         
         // StuntManager logic.
         _stuntManager?.HandleStuntTracking(
@@ -110,11 +169,31 @@ public class DriverController : MonoBehaviour
         {
             _frontTireRB.AddTorque(-torque);
             _backTireRB.AddTorque(-torque);
+            
+            // Play drive sound if not already playing.
+            if (_audioSource.clip != _driveAudioClip)
+            {
+                PlayAudioClip(_driveAudioClip, true);
+            }
         }
         else if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
         {
             _frontTireRB.AddTorque(torque);
             _backTireRB.AddTorque(torque);
+
+            // Play reverse sound if not already playing.
+            if (_audioSource.clip != _reverseAudioClip)
+            {
+                PlayAudioClip(_reverseAudioClip, true);
+            }
+        }
+        else
+        {
+            // Play idle sound if not already playing.
+            if (_audioSource.clip != _idleAudioClip)
+            {
+                PlayAudioClip(_idleAudioClip, true);
+            }
         }
     }
 
@@ -136,10 +215,56 @@ public class DriverController : MonoBehaviour
         }
     }
 
+    // Method to handle a ground hit from the main body of the bike, not the head.
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        // Check if the collision is with the ground and play a hit sound.
+        // We also check to ensure the colliding object is not the head and that the player is not already dead.
+        if (other.gameObject.CompareTag("Ground") && other.gameObject != _headTransform.gameObject && !_isDead)
+        {
+            if (_groundHitAudioClip != null)
+            {
+                _audioSourceGroundHit.PlayOneShot(_groundHitAudioClip);
+            }
+        }
+    }
+    
+    // Public method to be called by the HeadCollisionDetector to handle death.
+    public void HandleDeath()
+    {
+        // Only trigger death logic once.
+        if (_isDead) return;
+
+        _isDead = true;
+
+        // Stop all audio sources before playing the death audio.
+        _audioSource.Stop();
+        _audioSourceGroundHit.Stop();
+
+        // Play the death audio as a one-shot.
+        if (_deathAudioClip != null)
+        {
+            _audioSourceGroundHit.PlayOneShot(_deathAudioClip);
+        }
+
+        Debug.Log("Player is dead!");
+    }
+
     // Call this method from your death logic to tell the stunt system the player is dead.
     public void SetDead(bool dead)
     {
         _isDead = dead;
+    }
+
+    // Helper method to play audio clips.
+    private void PlayAudioClip(AudioClip clip, bool loop)
+    {
+        if (_audioSource != null && clip != null && !_isDead)
+        {
+            _audioSource.clip = clip;
+            _audioSource.loop = loop;
+            _audioSource.Play();
+        }
     }
 
 #if UNITY_EDITOR

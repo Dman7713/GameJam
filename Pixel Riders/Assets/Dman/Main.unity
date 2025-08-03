@@ -5442,6 +5442,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneName: MainMenu
+  audioSource: {fileID: 0}
+  clickSound: {fileID: 0}
+  switchDelay: 0.5
 --- !u!1 &530392109
 GameObject:
   m_ObjectHideFlags: 0
@@ -6674,6 +6677,8 @@ GameObject:
   - component: {fileID: 899760662}
   - component: {fileID: 899760661}
   - component: {fileID: 899760660}
+  - component: {fileID: 899760665}
+  - component: {fileID: 899760664}
   m_Layer: 5
   m_Name: DeathCanvas
   m_TagString: Untagged
@@ -6771,6 +6776,119 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!82 &899760664
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 899760659}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!114 &899760665
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 899760659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73d0f8f5ad4ccf48a85aa2ec8313b44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverSound: {fileID: 8300000, guid: 940ca93c2106fd148874587e2f7534a4, type: 3}
+  clickSound: {fileID: 8300000, guid: 48305c62e59890844935ed8083ae6f16, type: 3}
+  audioSource: {fileID: 899760664}
+  clickSoundDelay: 0.2
 --- !u!1 &928975807
 GameObject:
   m_ObjectHideFlags: 0
@@ -12412,7 +12530,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2003064237}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: RestartGame
+        m_MethodName: StartDelayedRestart
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -12484,7 +12602,6 @@ GameObject:
   - component: {fileID: 1337959965}
   - component: {fileID: 1337959968}
   - component: {fileID: 1337959967}
-  - component: {fileID: 1337959969}
   - component: {fileID: 1337959970}
   - component: {fileID: 1337959971}
   - component: {fileID: 1337959972}
@@ -12600,18 +12717,6 @@ WheelJoint2D:
   m_Motor:
     m_MotorSpeed: 0
     m_MaximumMotorForce: 10000
---- !u!114 &1337959969
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1337959964}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d62bed17f224024cba6517953ebc2cb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1337959970
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12629,6 +12734,8 @@ MonoBehaviour:
   _backTireRB: {fileID: 721341767}
   scoreCanvas: {fileID: 1538455755}
   _stuntManager: {fileID: 1337959974}
+  _audioSource: {fileID: 1337959971}
+  _headTransform: {fileID: 1535377192}
   _speed: 1000
   _rotationSpeed: 300
   _airRotationMultiplier: 6
@@ -12638,6 +12745,11 @@ MonoBehaviour:
   frontTireGroundCheck: {fileID: 795997258}
   backTireGroundCheck: {fileID: 597259798}
   groundCheckRadius: 0.5
+  _idleAudioClip: {fileID: 8300000, guid: 2924e9fb353307d41a5a1ab817090a48, type: 3}
+  _driveAudioClip: {fileID: 8300000, guid: 6ebb7ff05f58ee047997932e39094cbc, type: 3}
+  _reverseAudioClip: {fileID: 8300000, guid: c0d9e3b9901bbe7479dfd21a1ee6c8b8, type: 3}
+  _groundHitAudioClip: {fileID: 8300000, guid: 2924e9fb353307d41a5a1ab817090a48, type: 3}
+  _deathAudioClip: {fileID: 8300000, guid: 6ebb7ff05f58ee047997932e39094cbc, type: 3}
 --- !u!82 &1337959971
 AudioSource:
   m_ObjectHideFlags: 0
@@ -14677,7 +14789,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &2003064237
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14685,12 +14797,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2003064236}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8f7a10b1e13a1d941b26121fcb16f815, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _gameOverCanvas: {fileID: 0}
+  restartDelay: 0.2
 --- !u!4 &2003064238
 Transform:
   m_ObjectHideFlags: 0
