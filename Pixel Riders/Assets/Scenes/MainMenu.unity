@@ -2516,7 +2516,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.314
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -2615,6 +2615,7 @@ MonoBehaviour:
   hoverSound: {fileID: 8300000, guid: 940ca93c2106fd148874587e2f7534a4, type: 3}
   clickSound: {fileID: 8300000, guid: 48305c62e59890844935ed8083ae6f16, type: 3}
   audioSource: {fileID: 730521501}
+  clickSoundDelay: 0.2
 --- !u!1 &740234507
 GameObject:
   m_ObjectHideFlags: 0
@@ -5098,6 +5099,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneName: Main
+  audioSource: {fileID: 0}
+  clickSound: {fileID: 0}
+  switchDelay: 0.2
 --- !u!1 &1190791619
 GameObject:
   m_ObjectHideFlags: 0
@@ -5596,6 +5600,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e76945896c5b6f24a8e51ac20c94ad83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  audioSource: {fileID: 0}
+  clickSound: {fileID: 0}
+  quitDelay: 0.2
 --- !u!1 &1817997535
 GameObject:
   m_ObjectHideFlags: 0
