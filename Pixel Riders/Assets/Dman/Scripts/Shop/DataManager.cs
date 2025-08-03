@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.Linq; // Added for convenience
+using System.Linq;
 
 public class DataManager : MonoBehaviour
 {
@@ -37,7 +37,7 @@ public class DataManager : MonoBehaviour
     {
         coins = PlayerPrefs.GetInt(CoinsKey, 0);
         equippedSpriteName = PlayerPrefs.GetString(EquippedSpriteKey, "Default");
-        
+
         string ownedSpritesJson = PlayerPrefs.GetString(OwnedSpritesKey, "");
         if (!string.IsNullOrEmpty(ownedSpritesJson))
         {
@@ -51,6 +51,7 @@ public class DataManager : MonoBehaviour
         PlayerPrefs.SetString(EquippedSpriteKey, equippedSpriteName);
         PlayerPrefs.SetString(OwnedSpritesKey, string.Join(",", ownedSprites));
         PlayerPrefs.Save();
+        Debug.Log("Game data saved successfully!");
     }
 
     public void AddCoins(int amount)
@@ -67,8 +68,6 @@ public class DataManager : MonoBehaviour
 
     public void PurchaseSprite(string spriteName, int cost)
     {
-        // The ShopManager now handles the logic for checking if the item is owned and
-        // if the player has enough coins. This method simply performs the transaction.
         coins -= cost;
         ownedSprites.Add(spriteName);
         SaveData();
@@ -85,5 +84,13 @@ public class DataManager : MonoBehaviour
         equippedSpriteName = "Default";
 
         Debug.Log("Player data has been reset.");
+    }
+    
+    // This is the new, crucial part.
+    // It ensures data is saved when the application is closing, which is more reliable
+    // than relying on the editor's stop button.
+    private void OnApplicationQuit()
+    {
+        SaveData();
     }
 }

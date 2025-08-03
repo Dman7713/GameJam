@@ -65,6 +65,7 @@ public class DriverController : MonoBehaviour
     [SerializeField] private AudioClip _reverseAudioClip;
     [SerializeField] private AudioClip _groundHitAudioClip;
     [SerializeField] private AudioClip _deathAudioClip;
+    
 
     // State variables
     private bool _isGrounded;

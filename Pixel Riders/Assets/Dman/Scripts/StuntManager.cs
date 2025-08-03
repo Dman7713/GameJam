@@ -6,6 +6,10 @@ using Random = UnityEngine.Random;
 
 public class StuntManager : MonoBehaviour
 {
+    [Header("Game State")]
+    // A boolean flag to control when stunt tracking is active
+    private bool _isGameActive = false;
+
     [Header("References")]
     public GameObject stuntTextPrefab;
     public Canvas uiCanvas;
@@ -20,9 +24,9 @@ public class StuntManager : MonoBehaviour
     public float comboResetDelay = 1.5f;
 
     [Header("Landing Thresholds")]
-    public float cleanLandingMinSpeed = 20f;    // Clean: 20-45
+    public float cleanLandingMinSpeed = 20f;   // Clean: 20-45
     public float cleanLandingMaxSpeed = 45f;
-    public float perfectLandingMinSpeed = 46f;  // Perfect: 46-1000
+    public float perfectLandingMinSpeed = 46f; // Perfect: 46-1000
     public float perfectLandingMaxSpeed = 1000f;
     public float landingAngleTolerance = 15f;  // Allow up to 15° tilt
 
@@ -60,9 +64,32 @@ public class StuntManager : MonoBehaviour
         lastRotationZ = NormalizeAngle(transform.eulerAngles.z);
         UpdateScoreUIInstant();
     }
+    
+    // New public method to start the stunts and scoring
+    public void StartStunts()
+    {
+        _isGameActive = true;
+        Debug.Log("Stunt Manager is now active and tracking stunts.");
+    }
+    
+    // New public method to reset the score and game state
+    public void ResetScore()
+    {
+        _isGameActive = false;
+        totalScore = 0;
+        Score = 0;
+        currentComboCount = 0;
+        cumulativeRotation = 0f;
+        airtime = 0f;
+        UpdateScoreUIInstant();
+        Debug.Log("Stunt Manager score has been reset.");
+    }
 
     void Update()
     {
+        // Only run the Update logic if the game is active
+        if (!_isGameActive) return;
+
         bool grounded = bikeRigidbody.IsTouchingLayers(); // Replace with proper ground check
         float currentZ = NormalizeAngle(transform.eulerAngles.z);
         float delta = Mathf.DeltaAngle(lastRotationZ, currentZ);
@@ -83,6 +110,9 @@ public class StuntManager : MonoBehaviour
 
     public void HandleStuntTracking(bool grounded, bool playerDead, Rigidbody2D rb, bool frontGrounded, bool backGrounded, bool landedThisFrame)
     {
+        // Only proceed if the game is active
+        if (!_isGameActive) return;
+
         if (frontGrounded) lastFrontGroundTime = Time.time;
         if (backGrounded) lastBackGroundTime = Time.time;
 
@@ -155,6 +185,8 @@ public class StuntManager : MonoBehaviour
 
     void ShowStuntPopup(string label, int points, Color baseColor)
     {
+        // Only show popups if the game is active
+        if (!_isGameActive) return;
         if (stuntTextPrefab == null || uiCanvas == null) return;
         RectTransform canvasRect = uiCanvas.GetComponent<RectTransform>();
         Vector2 screenPos = new Vector2(
@@ -177,6 +209,8 @@ public class StuntManager : MonoBehaviour
 
     void ShowComboPopup(int comboCount)
     {
+        // Only show popups if the game is active
+        if (!_isGameActive) return;
         if (stuntTextPrefab == null || uiCanvas == null) return;
 
         RectTransform canvasRect = uiCanvas.GetComponent<RectTransform>();
@@ -199,50 +233,44 @@ public class StuntManager : MonoBehaviour
         StartCoroutine(AnimatePopup(popup, text));
     }
 
-    IEnumerator AnimatePopup(RectTransform popupRect, TextMeshProUGUI text) {
+    IEnumerator AnimatePopup(RectTransform popupRect, TextMeshProUGUI text)
+    {
         float timer = 0f;
-        while (timer < popupScaleDuration) {
+        while (timer < popupScaleDuration)
+        {
             timer += Time.deltaTime;
             float t = Mathf.SmoothStep(0f, 1f, timer / popupScaleDuration);
-            try {
-                popupRect.localScale = Vector3.one * t;
-            }
-            catch { }
+            try { popupRect.localScale = Vector3.one * t; } catch { }
             text.alpha = t;
             yield return null;
         }
         yield return new WaitForSeconds(popupVisibleDuration);
         timer = 0f;
-        while (timer < popupFadeDuration) {
+        while (timer < popupFadeDuration)
+        {
             timer += Time.deltaTime;
             float t = timer / popupFadeDuration;
-            try {
-                popupRect.localScale = Vector3.Lerp(Vector3.one, Vector3.one * 0.5f, t);
-            }
-            catch { }
+            try { popupRect.localScale = Vector3.Lerp(Vector3.one, Vector3.one * 0.5f, t); } catch { }
             text.alpha = 1f - t;
             yield return null;
         }
 
-        try {
-            Destroy(popupRect.gameObject);
-        }
-        catch {}
+        try { Destroy(popupRect.gameObject); } catch { }
     }
 
     void AddScore(int points)
     {
-        // Store the current score before adding points
+        // Only add score if the game is active
+        if (!_isGameActive) return;
+
         int startingScore = totalScore;
         totalScore += points;
         Score = totalScore;
         if (scoreCountingCoroutine != null)
             StopCoroutine(scoreCountingCoroutine);
-        // Start the coroutine, passing in both the starting and ending scores
         scoreCountingCoroutine = StartCoroutine(CountUp(startingScore, totalScore));
     }
 
-    // The CountUp coroutine now accepts the start and end score
     IEnumerator CountUp(int startScore, int targetScore)
     {
         if (totalScoreText == null) yield break;
@@ -252,7 +280,6 @@ public class StuntManager : MonoBehaviour
         {
             timer += Time.deltaTime;
             float easedT = Mathf.Sin(timer / duration * Mathf.PI * 0.5f);
-            // Lerp from the startScore to the targetScore
             int value = Mathf.RoundToInt(Mathf.Lerp(startScore, targetScore, easedT));
             totalScoreText.text = $"Score: {value}";
             yield return null;

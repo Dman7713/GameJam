@@ -4,14 +4,35 @@ using System.Collections;
 
 public class CountdownUI : MonoBehaviour
 {
+    [Header("References")]
     public Image[] countdownImages; // Assign 4 images here in inspector (3,2,1,GO)
+    public StuntManager stuntManager; // Reference to the StuntManager script
+
+    [Header("Settings")]
     public float startDelay = 1f;   // Delay before countdown begins
     public float displayTime = 1f;  // How long each image shows
     public float fadeTime = 0.5f;   // How long fade in/out takes
 
     private void Start()
     {
-        // Start countdown coroutine
+        // Start the game setup
+        StartGame();
+    }
+    
+    // A new public method to be called from other scripts to start a new game
+    public void StartGame()
+    {
+        // Ensure the StuntManager reference is assigned
+        if (stuntManager == null)
+        {
+            Debug.LogError("StuntManager reference is not assigned in the Inspector!");
+            return;
+        }
+
+        // Reset the score and game state on the StuntManager
+        stuntManager.ResetScore();
+        
+        // Now, start the countdown sequence
         StartCoroutine(CountdownSequence());
     }
 
@@ -45,6 +66,12 @@ public class CountdownUI : MonoBehaviour
         }
 
         Debug.Log("GO! Countdown finished.");
+
+        // Once the countdown is finished, activate the StuntManager's scoring logic
+        if (stuntManager != null)
+        {
+            stuntManager.StartStunts();
+        }
     }
 
     private IEnumerator FadeImage(Image img, float startAlpha, float endAlpha, float duration)
