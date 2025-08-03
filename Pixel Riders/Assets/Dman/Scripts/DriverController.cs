@@ -29,6 +29,11 @@ public class DriverController : MonoBehaviour
     [SerializeField] private Rigidbody2D _bikeRigidbody;
     [SerializeField] private Rigidbody2D _frontTireRB;
     [SerializeField] private Rigidbody2D _backTireRB;
+
+    // --- NEW ADDITIONS FOR SPRITE SYSTEM ---
+    [SerializeField] private SpriteRenderer _bikeBodyRenderer;
+    [SerializeField] private List<BikeBodySpriteSO> _allAvailableSprites;
+    // --- END NEW ADDITIONS ---
     
     // UI elements
     [SerializeField] private GameObject scoreCanvas;
@@ -77,17 +82,14 @@ public class DriverController : MonoBehaviour
             Debug.LogError("StuntManager component not found on DriverController GameObject.");
         }
         
-        // Main audio source for bike sounds
         _audioSource = GetComponent<AudioSource>();
         if (_audioSource == null)
         {
             Debug.LogError("AudioSource component not found on DriverController GameObject. Please add one.");
         }
 
-        // Create a separate audio source for one-shot sounds like ground hits and death
         _audioSourceGroundHit = gameObject.AddComponent<AudioSource>();
         
-        // If a head transform is assigned, add the collision detector component to it.
         if (_headTransform != null)
         {
             HeadCollisionDetector detector = _headTransform.gameObject.AddComponent<HeadCollisionDetector>();
@@ -97,33 +99,29 @@ public class DriverController : MonoBehaviour
 
     private void Start()
     {
-        // Ensure UI is active and physics is enabled from the start.
+        // --- NEW LINE: APPLY THE EQUIPPED SPRITE ON START ---
+        ShopManager.ApplyEquippedSprite(_bikeBodyRenderer, _allAvailableSprites);
+        // --- END NEW LINE ---
+
         scoreCanvas.SetActive(true);
 
-        // Turn on physics immediately.
         _bikeRigidbody.bodyType = RigidbodyType2D.Dynamic;
         _frontTireRB.bodyType = RigidbodyType2D.Dynamic;
         _backTireRB.bodyType = RigidbodyType2D.Dynamic;
 
-        // **FIXES:**
-        // To prevent high-speed tunneling, we set collision detection to continuous.
-        // This is especially important for fast-moving objects like the bike and its wheels.
         _bikeRigidbody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         _frontTireRB.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         _backTireRB.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         
-        // We also set interpolation to help smooth out visual stuttering.
         _bikeRigidbody.interpolation = RigidbodyInterpolation2D.Interpolate;
         _frontTireRB.interpolation = RigidbodyInterpolation2D.Interpolate;
         _backTireRB.interpolation = RigidbodyInterpolation2D.Interpolate;
         
-        // Enable the StuntManager from the beginning.
         if (_stuntManager != null)
         {
             _stuntManager.enabled = true;
         }
 
-        // Play the initial idle sound on loop.
         if (_audioSource != null && _idleAudioClip != null)
         {
             _audioSource.clip = _idleAudioClip;
@@ -134,7 +132,6 @@ public class DriverController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // Ground detection logic for stunt tracking.
         _frontTireGrounded = Physics2D.OverlapCircle(frontTireGroundCheck.position, groundCheckRadius, groundLayer);
         _backTireGrounded = Physics2D.OverlapCircle(backTireGroundCheck.position, groundCheckRadius, groundLayer);
         _isGrounded = _frontTireGrounded || _backTireGrounded;
@@ -142,14 +139,12 @@ public class DriverController : MonoBehaviour
         _landedThisFrame = !_wasGroundedLastFrame && _isGrounded;
         _wasGroundedLastFrame = _isGrounded;
 
-        // The core driving physics logic. Only allow movement if the player is not dead.
         if (!_isDead)
         {
             HandleMovement();
             HandleAirRotation();
         }
         
-        // StuntManager logic.
         _stuntManager?.HandleStuntTracking(
             _isGrounded,
             _isDead,
@@ -160,7 +155,6 @@ public class DriverController : MonoBehaviour
         );
     }
     
-    // Movement logic.
     private void HandleMovement()
     {
         float torque = _speed * Time.fixedDeltaTime;
@@ -170,7 +164,6 @@ public class DriverController : MonoBehaviour
             _frontTireRB.AddTorque(-torque);
             _backTireRB.AddTorque(-torque);
             
-            // Play drive sound if not already playing.
             if (_audioSource.clip != _driveAudioClip)
             {
                 PlayAudioClip(_driveAudioClip, true);
@@ -181,7 +174,6 @@ public class DriverController : MonoBehaviour
             _frontTireRB.AddTorque(torque);
             _backTireRB.AddTorque(torque);
 
-            // Play reverse sound if not already playing.
             if (_audioSource.clip != _reverseAudioClip)
             {
                 PlayAudioClip(_reverseAudioClip, true);
@@ -189,7 +181,6 @@ public class DriverController : MonoBehaviour
         }
         else
         {
-            // Play idle sound if not already playing.
             if (_audioSource.clip != _idleAudioClip)
             {
                 PlayAudioClip(_idleAudioClip, true);
@@ -197,7 +188,6 @@ public class DriverController : MonoBehaviour
         }
     }
 
-    // Air rotation logic.
     private void HandleAirRotation()
     {
         if (!_isGrounded)
@@ -215,11 +205,8 @@ public class DriverController : MonoBehaviour
         }
     }
 
-    // Method to handle a ground hit from the main body of the bike, not the head.
     private void OnCollisionEnter2D(Collision2D other)
     {
-        // Check if the collision is with the ground and play a hit sound.
-        // We also check to ensure the colliding object is not the head and that the player is not already dead.
         if (other.gameObject.CompareTag("Ground") && other.gameObject != _headTransform.gameObject && !_isDead)
         {
             if (_groundHitAudioClip != null)
@@ -229,19 +216,15 @@ public class DriverController : MonoBehaviour
         }
     }
     
-    // Public method to be called by the HeadCollisionDetector to handle death.
     public void HandleDeath()
     {
-        // Only trigger death logic once.
         if (_isDead) return;
 
         _isDead = true;
 
-        // Stop all audio sources before playing the death audio.
         _audioSource.Stop();
         _audioSourceGroundHit.Stop();
 
-        // Play the death audio as a one-shot.
         if (_deathAudioClip != null)
         {
             _audioSourceGroundHit.PlayOneShot(_deathAudioClip);
@@ -250,13 +233,11 @@ public class DriverController : MonoBehaviour
         Debug.Log("Player is dead!");
     }
 
-    // Call this method from your death logic to tell the stunt system the player is dead.
     public void SetDead(bool dead)
     {
         _isDead = dead;
     }
 
-    // Helper method to play audio clips.
     private void PlayAudioClip(AudioClip clip, bool loop)
     {
         if (_audioSource != null && clip != null && !_isDead)

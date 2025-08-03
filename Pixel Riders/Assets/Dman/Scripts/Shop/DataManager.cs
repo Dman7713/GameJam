@@ -36,7 +36,6 @@ public class DataManager : MonoBehaviour
         string ownedSpritesJson = PlayerPrefs.GetString(OwnedSpritesKey, "");
         if (!string.IsNullOrEmpty(ownedSpritesJson))
         {
-            // Simple way to handle the list of strings
             ownedSprites.AddRange(ownedSpritesJson.Split(','));
         }
     }
