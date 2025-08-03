@@ -23,7 +23,7 @@ public class StuntManager : MonoBehaviour
     public float cleanLandingMaxSpeed = 45f;
     public float perfectLandingMinSpeed = 46f;  // Perfect: 46-1000
     public float perfectLandingMaxSpeed = 1000f;
-    public float landingAngleTolerance = 15f;   // Allow up to 15° tilt
+    public float landingAngleTolerance = 15f;  // Allow up to 15° tilt
 
     [Header("Landing Window")]
     [Tooltip("Max time difference between wheel contacts to count as two-wheel landing.")]
@@ -201,7 +201,6 @@ public class StuntManager : MonoBehaviour
 
     IEnumerator AnimatePopup(RectTransform popupRect, TextMeshProUGUI text)
     {
-        
         float timer = 0f;
         while (timer < popupScaleDuration)
         {
@@ -226,29 +225,32 @@ public class StuntManager : MonoBehaviour
 
     void AddScore(int points)
     {
+        // Store the current score before adding points
+        int startingScore = totalScore;
         totalScore += points;
         Score = totalScore;
         if (scoreCountingCoroutine != null)
             StopCoroutine(scoreCountingCoroutine);
-        scoreCountingCoroutine = StartCoroutine(CountUp());
+        // Start the coroutine, passing in both the starting and ending scores
+        scoreCountingCoroutine = StartCoroutine(CountUp(startingScore, totalScore));
     }
 
-    IEnumerator CountUp()
+    // The CountUp coroutine now accepts the start and end score
+    IEnumerator CountUp(int startScore, int targetScore)
     {
         if (totalScoreText == null) yield break;
-        int displayed = 0;
-        int target = totalScore;
         float duration = 1.5f;
         float timer = 0f;
         while (timer < duration)
         {
             timer += Time.deltaTime;
             float easedT = Mathf.Sin(timer / duration * Mathf.PI * 0.5f);
-            int value = Mathf.RoundToInt(Mathf.Lerp(displayed, target, easedT));
+            // Lerp from the startScore to the targetScore
+            int value = Mathf.RoundToInt(Mathf.Lerp(startScore, targetScore, easedT));
             totalScoreText.text = $"Score: {value}";
             yield return null;
         }
-        totalScoreText.text = $"Score: {target}";
+        totalScoreText.text = $"Score: {targetScore}";
     }
 
     void UpdateScoreUIInstant()

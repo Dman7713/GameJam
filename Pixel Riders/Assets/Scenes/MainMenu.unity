@@ -326,10 +326,10 @@ MonoBehaviour:
     m_Bits: 64
   stuntManager: {fileID: 603425232}
   _scoreUIObject: {fileID: 0}
-  _deathParticleEffect: {fileID: 0}
   _deathCanvas: {fileID: 0}
   _deathText: {fileID: 0}
   _finalScoreText: {fileID: 0}
+  _highScoreText: {fileID: 0}
 --- !u!233 &265286729
 HingeJoint2D:
   m_ObjectHideFlags: 0
@@ -2085,17 +2085,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d62bed17f224024cba6517953ebc2cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _frontTireRB: {fileID: 643132278}
-  _backTireRB: {fileID: 1523855}
-  _carRB: {fileID: 603425231}
-  _speed: 800
-  _rotationSpeed: 80
-  _airRotationMultiplier: 6
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  groundCheck: {fileID: 796318026}
-  groundCheckRadius: 1.2
 --- !u!235 &603425239
 WheelJoint2D:
   m_ObjectHideFlags: 0
@@ -4543,7 +4532,7 @@ GameObject:
   - component: {fileID: 1072250672}
   - component: {fileID: 1072250674}
   m_Layer: 5
-  m_Name: Highscore
+  m_Name: HighscoreMM
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4680,6 +4669,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _highScoreText: {fileID: 1072250672}
+  _isMainMenu: 1
 --- !u!1 &1076295886
 GameObject:
   m_ObjectHideFlags: 0

@@ -5,46 +5,57 @@ using TMPro;
 public class HighScoreDisplay : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _highScoreText;
+    [SerializeField] private bool _isMainMenu = false;
     
     private const string HighScoreKey = "HighScore";
 
     public void Awake()
     {
-        // We'll leave the component reference here.
         if (_highScoreText == null)
         {
             _highScoreText = GetComponent<TextMeshProUGUI>();
         }
     }
-
-    private void OnEnable()
+    
+    public void Start()
     {
-        // This is called every time the object is enabled.
-        // It will now trigger the DisplayHighScore method which handles the animation from scratch.
-        DisplayHighScore();
+        if (_isMainMenu)
+        {
+            DisplayWithDelayedCountUpAnimation();
+        }
+    }
+
+    public void DisplayWithPopUpAnimation(TextMeshProUGUI highScoreText)
+    {
+        if (highScoreText == null)
+        {
+            Debug.LogError("HighScoreDisplay: TextMeshProUGUI for high score is not assigned!");
+            return;
+        }
+        
+        int highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
+        highScoreText.text = $"High Score: {highScore}";
+        
+        StartCoroutine(AnimatePopUp(highScoreText, 0.75f, 0f, 1f));
     }
     
-    public void DisplayHighScore()
+    public void DisplayWithDelayedCountUpAnimation()
     {
         if (_highScoreText == null)
         {
-            Debug.LogError("TextMeshProUGUI for high score is not assigned!");
+            Debug.LogError("HighScoreDisplay: TextMeshProUGUI for high score is not assigned!");
             return;
         }
-
-        // --- THE FIX IS HERE ---
-        // Reset the text's state immediately before starting the animation.
-        // This guarantees the pop-up effect will play every time.
+        
         _highScoreText.alpha = 0f;
         _highScoreText.transform.localScale = Vector3.zero;
-
-        int highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
-        _highScoreText.text = $"High Score: {highScore}";
         
-        StartCoroutine(AnimatePopUpText(_highScoreText, 0.75f, 0f, 1f));
+        int highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
+        
+        StartCoroutine(AnimatePopUpAndCountUp(_highScoreText, highScore));
     }
     
-    private IEnumerator AnimatePopUpText(TextMeshProUGUI text, float fadeInDuration, float delay, float popScale)
+    private IEnumerator AnimatePopUp(TextMeshProUGUI text, float fadeInDuration, float delay, float popScale)
     {
         yield return new WaitForSecondsRealtime(delay);
 
@@ -62,5 +73,42 @@ public class HighScoreDisplay : MonoBehaviour
         }
         text.transform.localScale = endScale;
         text.alpha = 1f;
+    }
+
+    private IEnumerator AnimatePopUpAndCountUp(TextMeshProUGUI text, int targetScore)
+    {
+        yield return new WaitForSecondsRealtime(3f);
+
+        float popUpDuration = 0.5f;
+        float timer = 0f;
+        Vector3 startScale = Vector3.zero;
+        Vector3 endScale = Vector3.one;
+
+        while (timer < popUpDuration)
+        {
+            timer += Time.unscaledDeltaTime;
+            float t = timer / popUpDuration;
+            text.transform.localScale = Vector3.Lerp(startScale, endScale, t);
+            text.alpha = Mathf.Lerp(0f, 1f, t);
+            yield return null;
+        }
+        text.transform.localScale = endScale;
+        text.alpha = 1f;
+        text.text = $"High Score: 0";
+
+        float countDuration = 1.5f;
+        timer = 0f;
+        int currentScore = 0;
+
+        while (timer < countDuration)
+        {
+            timer += Time.unscaledDeltaTime;
+            float progress = timer / countDuration;
+            currentScore = Mathf.RoundToInt(Mathf.Lerp(0, targetScore, progress));
+            text.text = $"High Score: {currentScore}";
+            yield return null;
+        }
+
+        text.text = $"High Score: {targetScore}";
     }
 }

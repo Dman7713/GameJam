@@ -11,14 +11,14 @@ public class DeathManager : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private StuntManager stuntManager;
     [SerializeField] private GameObject _scoreUIObject;
-    [SerializeField] private ParticleSystem _deathParticleEffect;
 
     [Header("Death UI")]
     [SerializeField] private GameObject _deathCanvas;
     [SerializeField] private TextMeshProUGUI _deathText;
     [SerializeField] private TextMeshProUGUI _finalScoreText;
-
-    // We no longer need the high score TextMeshPro here.
+    
+    [SerializeField] private TextMeshProUGUI _highScoreText;
+    
     private HighScoreDisplay _deathHighScoreDisplay;
 
     private bool hasDied = false;
@@ -38,6 +38,12 @@ public class DeathManager : MonoBehaviour
         {
             _finalScoreText.alpha = 0f;
             _finalScoreText.transform.localScale = Vector3.zero;
+        }
+
+        if (_highScoreText != null)
+        {
+            _highScoreText.alpha = 0f;
+            _highScoreText.transform.localScale = Vector3.zero;
         }
     }
     
@@ -69,26 +75,7 @@ public class DeathManager : MonoBehaviour
             return;
         }
 
-        if (_deathParticleEffect != null)
-        {
-            _deathParticleEffect.transform.SetParent(null);
-            _deathParticleEffect.transform.localScale = Vector3.one;
-            _deathParticleEffect.Play();
-            Destroy(_deathParticleEffect.gameObject, 2f);
-        }
-        else
-        {
-            Debug.LogError("Death particle effect is not assigned in the Inspector!");
-        }
-
-        foreach (HingeJoint2D hinge in head.GetComponents<HingeJoint2D>())
-            hinge.enabled = false;
-
-        foreach (WheelJoint2D wheel in head.GetComponents<WheelJoint2D>())
-            wheel.enabled = false;
-
         head.SetParent(null);
-
         Rigidbody2D rb = head.GetComponent<Rigidbody2D>();
         if (rb == null)
             rb = head.gameObject.AddComponent<Rigidbody2D>();
@@ -129,27 +116,36 @@ public class DeathManager : MonoBehaviour
 
             if (_finalScoreText != null)
             {
-                // Check if current score is a new high score.
                 int currentScore = StuntManager.Score;
+                
+                // New Debug Log: See what the current score is right before the check
+                Debug.Log($"DeathManager: Current score from StuntManager is {currentScore}");
+
                 int highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
+                
+                // New Debug Log: See what the high score is being read as
+                Debug.Log($"DeathManager: High score from PlayerPrefs is {highScore}");
 
                 if (currentScore > highScore)
                 {
                     PlayerPrefs.SetInt(HighScoreKey, currentScore);
                     PlayerPrefs.Save();
+                    Debug.Log($"DeathManager: New high score set to {currentScore}");
                 }
 
                 _finalScoreText.text = $"Score: {currentScore}";
-                StartCoroutine(AnimateDeathText(_finalScoreText, 0.5f, 0f, 1f));
+                yield return StartCoroutine(AnimateDeathText(_finalScoreText, 0.5f, 0f, 1f));
             }
             
-            // Now, find the HighScoreDisplay component in the scene and tell it to display the score.
             _deathHighScoreDisplay = _deathCanvas.GetComponentInChildren<HighScoreDisplay>();
             if (_deathHighScoreDisplay != null)
             {
-                // We add a delay so it appears after the final score.
                 yield return new WaitForSecondsRealtime(0.75f);
-                _deathHighScoreDisplay.DisplayHighScore();
+                _deathHighScoreDisplay.DisplayWithPopUpAnimation(_highScoreText);
+            }
+            else
+            {
+                Debug.LogError("HighScoreDisplay component not found! Make sure it's a child of the death canvas.");
             }
         }
     }
