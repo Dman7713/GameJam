@@ -366,13 +366,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da23c837d9a4f4e4a9950d10c1efbfe7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bikeRoot: {fileID: 603425229}
   stuntManager: {fileID: 603425232}
   _scoreUIObject: {fileID: 0}
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
   _headPopParticles: {fileID: 0}
+  _particleSize: 1
   _deathCanvas: {fileID: 0}
   _deathText: {fileID: 0}
   _finalScoreText: {fileID: 0}
@@ -2904,6 +2904,68 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 603425229}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &950606941
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 950606943}
+  - component: {fileID: 950606942}
+  m_Layer: 0
+  m_Name: CoinSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &950606942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 950606941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 412264d83706dcc409d9a8ade7d5a348, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  coinPrefab: {fileID: 664809749524809054, guid: b9e56b19343bcba4ab524c40cf1b3ca1, type: 3}
+  spawnInterval: 1
+  terrainLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  forwardSpawnDistance: 20
+  horizontalRange: 5
+  verticalRange: 5
+  raycastHeight: 10
+  airCoinChance: 0.3
+  airMinHeight: 2
+  airMaxHeight: 5
+  chunkSpawnChance: 0.4
+  minChunkSize: 3
+  maxChunkSize: 8
+  chunkSpacing: 1.5
+  minSingles: 1
+  maxSingles: 4
+--- !u!4 &950606943
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 950606941}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 112.79798, y: 78.24104, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &957780513
 GameObject:
@@ -6480,7 +6542,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -1653, y: -413.8}
+  m_AnchoredPosition: {x: -1653, y: -415.6}
   m_SizeDelta: {x: 169.0497, y: 169.0497}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2072263523
@@ -6579,3 +6641,4 @@ SceneRoots:
   - {fileID: 1445403877}
   - {fileID: 210908231}
   - {fileID: 597200001}
+  - {fileID: 950606943}
