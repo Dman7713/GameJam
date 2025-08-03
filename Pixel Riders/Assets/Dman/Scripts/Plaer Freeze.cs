@@ -3,6 +3,7 @@ using UnityEngine;
 public class FreezeRigidbody2D : MonoBehaviour
 {
     public Rigidbody2D playerRigidbody;
+    public MonoBehaviour movementScriptToDisable; // Reference to your bike movement script
     public float freezeDelay = 2f;      // Time before freezing starts
     public float freezeDuration = 3f;   // How long to stay frozen
 
@@ -10,6 +11,9 @@ public class FreezeRigidbody2D : MonoBehaviour
     {
         if (playerRigidbody == null)
             playerRigidbody = GetComponent<Rigidbody2D>();
+
+        if (movementScriptToDisable != null)
+            movementScriptToDisable.enabled = false;
 
         StartCoroutine(FreezeWithDelay());
     }
@@ -27,5 +31,9 @@ public class FreezeRigidbody2D : MonoBehaviour
 
         // Unfreeze Rigidbody2D
         playerRigidbody.constraints = RigidbodyConstraints2D.None;
+
+        // Enable movement script again
+        if (movementScriptToDisable != null)
+            movementScriptToDisable.enabled = true;
     }
 }

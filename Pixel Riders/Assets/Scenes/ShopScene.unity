@@ -572,6 +572,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 831857a3080b7074290d232dec96da26, type: 2}
   - {fileID: 11400000, guid: 3042d9544cd50db4bbcccb160271710f, type: 2}
   - {fileID: 11400000, guid: 17fd8d41953e84e418163c0a80c9187d, type: 2}
+  cooldownDuration: 0.25
 --- !u!82 &338159806
 AudioSource:
   m_ObjectHideFlags: 0
@@ -6626,7 +6627,7 @@ AudioSource:
   m_PlayOnAwake: 1
   m_Volume: 0.1
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0

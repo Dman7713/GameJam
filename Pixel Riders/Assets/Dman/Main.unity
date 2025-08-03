@@ -155,7 +155,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: -1614.8, y: 1645.6}
+  m_AnchoredPosition: {x: -1590.1, y: 1637.2}
   m_SizeDelta: {x: 169.0497, y: 169.04968}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!95 &19643599
@@ -192,8 +192,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17047be7f52e3bc43bb2e06a6e246d9a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveDuration: 7
-  moveSpeed: 800
+  moveDuration: 2.3
+  moveSpeed: 1000
 --- !u!114 &19643601
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -298,7 +298,7 @@ RectTransform:
   m_GameObject: {fileID: 117735962}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_LocalScale: {x: 7, y: 7, z: 7}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1314935495}
@@ -5724,7 +5724,7 @@ RectTransform:
   m_GameObject: {fileID: 387340041}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_LocalScale: {x: 7, y: 7, z: 7}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1314935495}
@@ -6188,8 +6188,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rootUIToFade: {fileID: 1935490655}
-  delayBeforeFade: 4
-  fadeDuration: 2
+  delayBeforeFade: 3
+  fadeDuration: 1
   loadingUI: {fileID: 925155546}
 --- !u!4 &612635152
 Transform:
@@ -7490,7 +7490,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &925155547
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12531,7 +12531,7 @@ RectTransform:
   m_GameObject: {fileID: 972243697}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_LocalScale: {x: 7, y: 7, z: 7}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1314935495}
@@ -13399,9 +13399,9 @@ MonoBehaviour:
   - {fileID: 117735966}
   - {fileID: 972243701}
   stuntManager: {fileID: 1337959974}
-  startDelay: 4
-  displayTime: 1
-  fadeTime: 0.5
+  startDelay: 3
+  displayTime: 0.75
+  fadeTime: 0.2
 --- !u!114 &1314935492
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13657,7 +13657,7 @@ MonoBehaviour:
   _driveAudioClip: {fileID: 0}
   _reverseAudioClip: {fileID: 0}
   _groundHitAudioClip: {fileID: 0}
-  _deathAudioClip: {fileID: 0}
+  _deathAudioClip: {fileID: 8300000, guid: 1557eb73fc274a94aa57a2721c79e42d, type: 3}
 --- !u!82 &1337959971
 AudioSource:
   m_ObjectHideFlags: 0
@@ -13906,8 +13906,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerRigidbody: {fileID: 1337959965}
+  movementScriptToDisable: {fileID: 1337959970}
   freezeDelay: 3
-  freezeDuration: 7
+  freezeDuration: 4
 --- !u!1 &1407242514
 GameObject:
   m_ObjectHideFlags: 0
@@ -14786,7 +14787,7 @@ RectTransform:
   m_GameObject: {fileID: 1538058492}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_LocalScale: {x: 7, y: 7, z: 7}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1314935495}
@@ -15292,7 +15293,7 @@ Transform:
   m_GameObject: {fileID: 1670913561}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 28.5812, y: 137.855, z: 52}
+  m_LocalPosition: {x: -71.1, y: 137.855, z: 52}
   m_LocalScale: {x: 27.379274, y: 34.11281, z: 40491.258}
   m_ConstrainProportionsScale: 0
   m_Children: []
