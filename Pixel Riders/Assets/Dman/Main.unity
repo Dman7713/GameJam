@@ -13508,6 +13508,8 @@ GameObject:
   - component: {fileID: 1337959975}
   - component: {fileID: 1337959976}
   - component: {fileID: 1337959977}
+  - component: {fileID: 1337959979}
+  - component: {fileID: 1337959978}
   m_Layer: 0
   m_Name: Bike Controller
   m_TagString: Player
@@ -13623,7 +13625,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1337959964}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 04351e14f644d3341ae164e5732cd941, type: 3}
   m_Name: 
@@ -13821,7 +13823,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1337959964}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 059fd5e245b25374999f6a510f71c446, type: 3}
   m_Name: 
@@ -13909,6 +13911,51 @@ MonoBehaviour:
   movementScriptToDisable: {fileID: 1337959970}
   freezeDelay: 3
   freezeDuration: 4
+--- !u!114 &1337959978
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1337959964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc83b27c9f80ed4585645bd79da6af5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _driverController: {fileID: 1337959979}
+  _totalScoreText: {fileID: 735195255}
+  _stuntTextPrefab: {fileID: 8565786849556591773, guid: 8b995d93d89eabe4a8da9c5925cdb174, type: 3}
+  _uiCanvas: {fileID: 1538455758}
+  _minAirtimeForStunts: 0.3
+  _comboResetDelay: 1.5
+  _landingAngleTolerance: 15
+  _cleanLandingMinSpeed: 20
+  _perfectLandingMinSpeed: 46
+--- !u!114 &1337959979
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1337959964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83aadc34b04b9984087ccc60417822e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _bikeRigidbody: {fileID: 1337959965}
+  _frontWheelJoint: {fileID: 1337959968}
+  _backWheelJoint: {fileID: 1337959968}
+  _motorSpeed: 1000
+  _motorTorque: 1000
+  _airRotationTorque: 150
+  _groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  _frontGroundCheck: {fileID: 795997258}
+  _backGroundCheck: {fileID: 597259798}
+  _groundCheckRadius: 0.1
 --- !u!1 &1407242514
 GameObject:
   m_ObjectHideFlags: 0
