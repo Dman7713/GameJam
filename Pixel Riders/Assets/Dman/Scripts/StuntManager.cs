@@ -102,6 +102,7 @@ public class StuntManager : MonoBehaviour
         if (!grounded && groundedLastFrame) {
             cumulativeRotation += Mathf.DeltaAngle(0f, currentZ);
         }
+    
 
         if (!grounded)
         {
