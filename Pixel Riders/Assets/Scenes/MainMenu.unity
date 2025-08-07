@@ -377,6 +377,10 @@ MonoBehaviour:
   _deathText: {fileID: 0}
   _finalScoreText: {fileID: 0}
   _highScoreText: {fileID: 0}
+  soundGameObject: {fileID: 0}
+  slowMoPitch: 0.5
+  slowMoVolume: 0.3
+  soundFadeDuration: 0.5
 --- !u!233 &265286729
 HingeJoint2D:
   m_ObjectHideFlags: 0

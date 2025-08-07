@@ -1,4 +1,3 @@
-// DeathManager.cs
 using UnityEngine;
 using System.Collections;
 using TMPro;
@@ -17,7 +16,6 @@ public class DeathManager : MonoBehaviour
 
     [Header("Particles")]
     [SerializeField] private ParticleSystem _headPopParticles;
-    // New field to control the size of the particles.
     [SerializeField] private float _particleSize = 1.0f;
 
     [Header("Death UI")]
@@ -25,9 +23,14 @@ public class DeathManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _deathText;
     [SerializeField] private TextMeshProUGUI _finalScoreText;
     [SerializeField] private TextMeshProUGUI _highScoreText;
-    
-    private HighScoreDisplay _deathHighScoreDisplay;
 
+    [Header("Sound Settings")]
+    [SerializeField] private GameObject soundGameObject;
+    [SerializeField] private float slowMoPitch = 0.5f;
+    [SerializeField] private float slowMoVolume = 0.3f;
+    [SerializeField] private float soundFadeDuration = 0.5f;
+
+    private HighScoreDisplay _deathHighScoreDisplay;
     private bool hasDied = false;
     private const string HighScoreKey = "HighScore";
 
@@ -38,13 +41,11 @@ public class DeathManager : MonoBehaviour
         else
             Destroy(gameObject);
 
-        // Check if the necessary components are present on the head GameObject.
         if (GetComponent<Rigidbody2D>() == null || GetComponent<Collider2D>() == null)
         {
             Debug.LogError("DeathManager script requires a Rigidbody2D and Collider2D on the same GameObject to detect collisions. Make sure the head has these components.");
         }
-        
-        // Log a message if a joint is found, as it will be destroyed on death.
+
         if (GetComponent<Joint2D>() != null)
         {
             Debug.Log("DeathManager found a Joint2D on the head. This joint will be destroyed on death to unattach the head.");
@@ -65,15 +66,9 @@ public class DeathManager : MonoBehaviour
             _highScoreText.transform.localScale = Vector3.zero;
         }
     }
-    
-    /// <summary>
-    /// Detects collisions with the ground to trigger the death sequence.
-    /// This method is on the DeathManager script itself, which should be attached to the head.
-    /// </summary>
-    /// <param name="collision">The collision data.</param>
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // Check if the collided object is on the ground layer and the player hasn't died yet.
         if (!hasDied && ((1 << collision.gameObject.layer) & groundLayer) != 0)
         {
             Debug.Log("Driver's head hit the ground!");
@@ -81,27 +76,22 @@ public class DeathManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Triggers the player's death sequence, including unparenting the head and playing particles.
-    /// </summary>
     public void TriggerDeath()
     {
         if (hasDied) return;
-
         hasDied = true;
 
         // Play the particle effect at the head's position.
         if (_headPopParticles != null)
         {
-            // Unparent the particle system from the head so it doesn't move with it.
             _headPopParticles.transform.SetParent(null);
-
-            // Set the particle size to the desired value.
             var mainModule = _headPopParticles.main;
             mainModule.startSize = _particleSize;
-
             _headPopParticles.Play();
         }
+
+        if (soundGameObject != null)
+            StartCoroutine(SlowDownAndFadeSound());
 
         UnparentAndEnableRagdoll();
         HandlePlayerDeath();
@@ -109,20 +99,15 @@ public class DeathManager : MonoBehaviour
 
     private void UnparentAndEnableRagdoll()
     {
-        // Find and destroy all Joint2D components on this GameObject to sever the physical connection.
         Joint2D[] joints = GetComponents<Joint2D>();
         foreach (Joint2D joint in joints)
         {
             Destroy(joint);
         }
 
-        // Unparent the head (this GameObject) so it can move independently.
-        this.transform.SetParent(null);
+        transform.SetParent(null);
 
-        // Get the Rigidbody2D component which should already be on the head.
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
-        
-        // This check is now mostly for safety, as Awake() should have caught this.
         if (rb == null)
             rb = gameObject.AddComponent<Rigidbody2D>();
 
@@ -163,11 +148,9 @@ public class DeathManager : MonoBehaviour
             if (_finalScoreText != null)
             {
                 int currentScore = StuntManager.Score;
-                
                 Debug.Log($"DeathManager: Current score from StuntManager is {currentScore}");
 
                 int highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
-                
                 Debug.Log($"DeathManager: High score from PlayerPrefs is {highScore}");
 
                 if (currentScore > highScore)
@@ -180,7 +163,7 @@ public class DeathManager : MonoBehaviour
                 _finalScoreText.text = $"Score: {currentScore}";
                 yield return StartCoroutine(AnimateDeathText(_finalScoreText, 0.5f, 0f, 1f));
             }
-            
+
             _deathHighScoreDisplay = _deathCanvas.GetComponentInChildren<HighScoreDisplay>();
             if (_deathHighScoreDisplay != null)
             {
@@ -191,6 +174,41 @@ public class DeathManager : MonoBehaviour
             {
                 Debug.LogError("HighScoreDisplay component not found! Make sure it's a child of the death canvas.");
             }
+        }
+    }
+
+    private IEnumerator SlowDownAndFadeSound()
+    {
+        AudioSource[] audioSources = soundGameObject.GetComponentsInChildren<AudioSource>();
+        float timer = 0f;
+
+        float[] originalPitches = new float[audioSources.Length];
+        float[] originalVolumes = new float[audioSources.Length];
+
+        for (int i = 0; i < audioSources.Length; i++)
+        {
+            originalPitches[i] = audioSources[i].pitch;
+            originalVolumes[i] = audioSources[i].volume;
+        }
+
+        while (timer < soundFadeDuration)
+        {
+            timer += Time.unscaledDeltaTime;
+            float t = timer / soundFadeDuration;
+
+            for (int i = 0; i < audioSources.Length; i++)
+            {
+                audioSources[i].pitch = Mathf.Lerp(originalPitches[i], slowMoPitch, t);
+                audioSources[i].volume = Mathf.Lerp(originalVolumes[i], slowMoVolume, t);
+            }
+
+            yield return null;
+        }
+
+        for (int i = 0; i < audioSources.Length; i++)
+        {
+            audioSources[i].pitch = slowMoPitch;
+            audioSources[i].volume = slowMoVolume;
         }
     }
 
@@ -242,6 +260,7 @@ public class DeathManager : MonoBehaviour
             text.alpha = Mathf.Lerp(0f, 1f, t);
             yield return null;
         }
+
         text.transform.localScale = endScale;
         text.alpha = 1f;
     }
