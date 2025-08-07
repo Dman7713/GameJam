@@ -11,22 +11,10 @@ public class TimeManager : MonoBehaviour
         {
             instance = this;
             DontDestroyOnLoad(gameObject);
-            SceneManager.sceneLoaded += OnSceneLoaded;
         }
         else
         {
             Destroy(gameObject);
         }
-    }
-
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        Time.timeScale = 1f;
-    }
-
-    private void OnDestroy()
-    {
-        if (instance == this)
-            SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 }

@@ -93,17 +93,19 @@ public class CoinSpawner : MonoBehaviour
             {
                 float airHeight = Random.Range(airMinHeight, airMaxHeight);
                 Vector2 airPos = new Vector2(x, y + airHeight);
-                Instantiate(coinPrefab, airPos, Quaternion.identity);
+                GameObject coin = Instantiate(coinPrefab, airPos, Quaternion.identity);
+                coin.transform.position = airPos;
+                coin.transform.parent = gameObject.transform;
             }
-            else
-            {
-                RaycastHit2D hit = Physics2D.Raycast(spawnOrigin, Vector2.down, raycastHeight * 2, terrainLayer);
-                if (hit.collider != null)
-                {
-                    Vector2 groundPos = hit.point + Vector2.up * 0.5f;
-                    Instantiate(coinPrefab, groundPos, Quaternion.identity);
-                }
-            }
+            //else
+            //{
+            //    RaycastHit2D hit = Physics2D.Raycast(spawnOrigin, Vector2.down, raycastHeight * 2, terrainLayer);
+            //    if (hit.collider != null)
+            //    {
+            //        Vector2 groundPos = hit.point + Vector2.up * 0.5f;
+            //        Instantiate(coinPrefab, groundPos, Quaternion.identity);
+            //    }
+            //}
         }
     }
 }

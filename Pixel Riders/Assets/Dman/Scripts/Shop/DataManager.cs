@@ -24,6 +24,7 @@ public class DataManager : MonoBehaviour
             // And ensure it persists across scene changes
             DontDestroyOnLoad(gameObject);
             LoadData();
+            Debug.Log(Instance);
         }
         else
         {
