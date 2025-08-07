@@ -48,6 +48,8 @@ public class StuntManager : MonoBehaviour
     private float lastFrontGroundTime = -Mathf.Infinity;
     private float lastBackGroundTime = -Mathf.Infinity;
 
+    private bool groundedLastFrame;
+
     public static int Score { get; private set; }
 
     void Awake()
@@ -59,6 +61,8 @@ public class StuntManager : MonoBehaviour
         perfectLandingMaxSpeed = 1000f;
         landingAngleTolerance = 15f;
         dualWheelGroundWindow = 0.2f;
+        groundedLastFrame = false;
+
 
         bikeRigidbody = GetComponent<Rigidbody2D>();
         lastRotationZ = NormalizeAngle(transform.eulerAngles.z);
@@ -92,11 +96,17 @@ public class StuntManager : MonoBehaviour
 
         bool grounded = bikeRigidbody.IsTouchingLayers(); // Replace with proper ground check
         float currentZ = NormalizeAngle(transform.eulerAngles.z);
-        float delta = Mathf.DeltaAngle(lastRotationZ, currentZ);
+
+        
+
+        if (!grounded && groundedLastFrame) {
+            cumulativeRotation += Mathf.DeltaAngle(0f, currentZ);
+        }
+
         if (!grounded)
         {
             airtime += Time.deltaTime;
-            cumulativeRotation += delta;
+            cumulativeRotation += Mathf.DeltaAngle(lastRotationZ, currentZ); ;
         }
         lastRotationZ = currentZ;
 
@@ -106,6 +116,8 @@ public class StuntManager : MonoBehaviour
             if (comboTimer <= 0f)
                 currentComboCount = 0;
         }
+
+        groundedLastFrame = grounded;
     }
 
     public void HandleStuntTracking(bool grounded, bool playerDead, Rigidbody2D rb, bool frontGrounded, bool backGrounded, bool landedThisFrame)

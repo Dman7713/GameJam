@@ -43,6 +43,7 @@ public class CoinController : MonoBehaviour
     {
         // Store the coin's starting position for the hover animation.
         startPosition = transform.position;
+
     }
 
     /// <summary>
