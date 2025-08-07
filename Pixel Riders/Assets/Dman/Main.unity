@@ -13947,9 +13947,9 @@ MonoBehaviour:
   _bikeRigidbody: {fileID: 1337959965}
   _frontWheelJoint: {fileID: 1337959968}
   _backWheelJoint: {fileID: 1337959968}
-  _motorSpeed: 1000
+  _motorSpeed: 1500
   _motorTorque: 1000
-  _airRotationTorque: 150
+  _airRotationTorque: 200
   _groundLayer:
     serializedVersion: 2
     m_Bits: 0
