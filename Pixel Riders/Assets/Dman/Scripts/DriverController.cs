@@ -74,6 +74,8 @@ public class DriverController : MonoBehaviour
     private bool _isDead;
     private bool _frontTireGrounded;
     private bool _backTireGrounded;
+
+    public bool IsDead {  get { return _isDead; } }
     
     private void Awake()
     {

@@ -34,6 +34,10 @@ public class DriverControllerV2 : MonoBehaviour
     private bool _isGrounded;
     private bool _wasGroundedLastFrame;
 
+    public bool IsDead {
+        get { return _isDead; }
+    }
+
     // Public properties for easy access
     public bool IsGrounded => _isGrounded;
     public bool FrontWheelGrounded => Physics2D.OverlapCircle(_frontGroundCheck.position, _groundCheckRadius, _groundLayer);
@@ -122,8 +126,9 @@ public class DriverControllerV2 : MonoBehaviour
     public void HandleDeath()
     {
         if (_isDead) return;
+
         _isDead = true;
-        
+        Debug.Log(IsDead);
         // Stop all movement
         _frontWheelJoint.motor = new JointMotor2D();
         _backWheelJoint.motor = new JointMotor2D();

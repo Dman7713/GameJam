@@ -34,6 +34,7 @@ public class CoinController : MonoBehaviour
     // --- Private variables ---
     private Vector3 startPosition;
     private bool isCollected = false;
+    private DriverController player;
 
     /// <summary>
     /// Called when the script instance is being loaded.
@@ -43,13 +44,13 @@ public class CoinController : MonoBehaviour
     {
         // Store the coin's starting position for the hover animation.
         startPosition = transform.position;
-
+        player = GameObject.Find("Bike Controller").GetComponent<DriverController>();
     }
 
     /// <summary>
     /// Update is called once per frame.
     /// Used here to perform the subtle hovering animation.
-    /// </summary>
+    /// </summary>/// 
     void Update()
     {
         // Only perform the animation if the coin has not been collected yet.
@@ -67,6 +68,8 @@ public class CoinController : MonoBehaviour
     /// <param name="other">The other Collider2D involved in the collision.</param>
     void OnTriggerEnter2D(Collider2D other)
     {
+        Debug.Log(player.IsDead);
+        if (player.IsDead) { return; }
         // Check if the colliding object has the specified player tag and the coin hasn't been collected yet.
         if (other.CompareTag(playerTag) && !isCollected)
         {
