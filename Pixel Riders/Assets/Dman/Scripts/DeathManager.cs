@@ -29,6 +29,7 @@ public class DeathManager : MonoBehaviour
     [SerializeField] private float slowMoPitch = 0.5f;
     [SerializeField] private float slowMoVolume = 0.3f;
     [SerializeField] private float soundFadeDuration = 0.5f;
+    [SerializeField] public AnimationCurve slowdownCurve;
 
     private HighScoreDisplay _deathHighScoreDisplay;
     private bool hasDied = false;
@@ -177,40 +178,42 @@ public class DeathManager : MonoBehaviour
         }
     }
 
-    private IEnumerator SlowDownAndFadeSound()
+private IEnumerator SlowDownAndFadeSound()
+{
+    AudioSource[] audioSources = soundGameObject.GetComponentsInChildren<AudioSource>();
+    float timer = 0f;
+
+    float[] originalPitches = new float[audioSources.Length];
+    float[] originalVolumes = new float[audioSources.Length];
+
+    for (int i = 0; i < audioSources.Length; i++)
     {
-        AudioSource[] audioSources = soundGameObject.GetComponentsInChildren<AudioSource>();
-        float timer = 0f;
-
-        float[] originalPitches = new float[audioSources.Length];
-        float[] originalVolumes = new float[audioSources.Length];
-
-        for (int i = 0; i < audioSources.Length; i++)
-        {
-            originalPitches[i] = audioSources[i].pitch;
-            originalVolumes[i] = audioSources[i].volume;
-        }
-
-        while (timer < soundFadeDuration)
-        {
-            timer += Time.unscaledDeltaTime;
-            float t = timer / soundFadeDuration;
-
-            for (int i = 0; i < audioSources.Length; i++)
-            {
-                audioSources[i].pitch = Mathf.Lerp(originalPitches[i], slowMoPitch, t);
-                audioSources[i].volume = Mathf.Lerp(originalVolumes[i], slowMoVolume, t);
-            }
-
-            yield return null;
-        }
-
-        for (int i = 0; i < audioSources.Length; i++)
-        {
-            audioSources[i].pitch = slowMoPitch;
-            audioSources[i].volume = slowMoVolume;
-        }
+        originalPitches[i] = audioSources[i].pitch;
+        originalVolumes[i] = audioSources[i].volume;
     }
+
+    while (timer < soundFadeDuration)
+    {
+        timer += Time.unscaledDeltaTime;
+        float t = timer / soundFadeDuration;
+        float curveValue = slowdownCurve.Evaluate(t); // Use the animation curve here
+
+        for (int i = 0; i < audioSources.Length; i++)
+        {
+            audioSources[i].pitch = Mathf.Lerp(originalPitches[i], slowMoPitch, curveValue);
+            audioSources[i].volume = Mathf.Lerp(originalVolumes[i], slowMoVolume, curveValue);
+        }
+
+        yield return null;
+    }
+
+    // Ensure the final values are set correctly at the end
+    for (int i = 0; i < audioSources.Length; i++)
+    {
+        audioSources[i].pitch = slowMoPitch;
+        audioSources[i].volume = slowMoVolume;
+    }
+}
 
     public bool IsDead()
     {
