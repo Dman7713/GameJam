@@ -138,7 +138,7 @@ public class NotificationManager : MonoBehaviour
         }
         panelRect.anchoredPosition = new Vector2(panelRect.anchoredPosition.x, targetYPosition);
         notificationText.color = originalTextColor;
-        
+
         // Display
         yield return new WaitForSecondsRealtime(displayDuration);
 
@@ -162,3 +162,7 @@ public class NotificationManager : MonoBehaviour
         isAnimating = false;
     }
 }
+
+// HOW TO NOTIFY
+// NotificationManager.Instance.ShowNotification(NotificationManager.NotificationType.Error, "Player is dead!");
+

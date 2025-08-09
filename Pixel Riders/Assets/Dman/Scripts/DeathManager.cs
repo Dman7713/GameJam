@@ -129,9 +129,6 @@ public class DeathManager : MonoBehaviour
     private IEnumerator DeathSequence()
     {
 
-        NotificationManager.Instance.ShowNotification(NotificationManager.NotificationType.Error, "Player is dead!");
-
-
         Time.timeScale = 0.3f;
 
         if (stuntManager != null && stuntManager.uiCanvas != null)
