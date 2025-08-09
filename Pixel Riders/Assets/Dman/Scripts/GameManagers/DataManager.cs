@@ -7,10 +7,12 @@ public class DataManager : MonoBehaviour
     public static DataManager Instance;
 
     public int coins;
+    public int highScore; // New variable for high score
     public List<string> ownedSprites = new List<string>();
     public string equippedSpriteName;
 
     private const string CoinsKey = "PlayerCoins";
+    private const string HighScoreKey = "HighScore"; // New key for high score
     private const string EquippedSpriteKey = "EquippedSprite";
     private const string OwnedSpritesKey = "OwnedSprites";
 
@@ -37,6 +39,7 @@ public class DataManager : MonoBehaviour
     private void LoadData()
     {
         coins = PlayerPrefs.GetInt(CoinsKey, 0);
+        highScore = PlayerPrefs.GetInt(HighScoreKey, 0); // Load high score
         equippedSpriteName = PlayerPrefs.GetString(EquippedSpriteKey, "Default");
 
         string ownedSpritesJson = PlayerPrefs.GetString(OwnedSpritesKey, "");
@@ -49,6 +52,7 @@ public class DataManager : MonoBehaviour
     public void SaveData()
     {
         PlayerPrefs.SetInt(CoinsKey, coins);
+        PlayerPrefs.SetInt(HighScoreKey, highScore); // Save high score
         PlayerPrefs.SetString(EquippedSpriteKey, equippedSpriteName);
         PlayerPrefs.SetString(OwnedSpritesKey, string.Join(",", ownedSprites));
         PlayerPrefs.Save();
@@ -59,6 +63,15 @@ public class DataManager : MonoBehaviour
     {
         coins += amount;
         SaveData();
+    }
+
+    public void UpdateHighScore(int currentScore)
+    {
+        if (currentScore > highScore)
+        {
+            highScore = currentScore;
+            SaveData();
+        }
     }
 
     public void EquipSprite(string spriteName)
@@ -81,6 +94,7 @@ public class DataManager : MonoBehaviour
 
         // Reset the variables to their default state
         coins = 0;
+        highScore = 0;
         ownedSprites.Clear();
         equippedSpriteName = "Default";
 

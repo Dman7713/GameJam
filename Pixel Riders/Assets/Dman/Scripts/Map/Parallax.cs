@@ -116,7 +116,6 @@ public class ParallaxLayer : MonoBehaviour
             enabled = false;
             return;
         }
-        Debug.Log("ParallaxLayer on " + gameObject.name + ": Effective Segment Width = " + effectiveSegmentWidth);
 
 
         // Calculate the camera's visible width in world units

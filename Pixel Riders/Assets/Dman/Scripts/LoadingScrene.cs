@@ -15,6 +15,7 @@ public class GameStartFade : MonoBehaviour
 
     void Start()
     {
+
         timer = 0f;
 
         // Get all Image components inside the root GameObject (including children)

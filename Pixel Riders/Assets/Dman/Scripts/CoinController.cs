@@ -68,7 +68,6 @@ public class CoinController : MonoBehaviour
     /// <param name="other">The other Collider2D involved in the collision.</param>
     void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log(player.IsDead);
         if (player.IsDead) { return; }
         // Check if the colliding object has the specified player tag and the coin hasn't been collected yet.
         if (other.CompareTag(playerTag) && !isCollected)

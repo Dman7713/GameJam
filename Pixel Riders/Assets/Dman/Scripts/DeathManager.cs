@@ -1,6 +1,9 @@
 using UnityEngine;
 using System.Collections;
 using TMPro;
+using CrazyGames;
+
+
 
 /// <summary>
 /// This script manages the player's death sequence.
@@ -30,10 +33,12 @@ public class DeathManager : MonoBehaviour
     [SerializeField] private float slowMoVolume = 0.3f;
     [SerializeField] private float soundFadeDuration = 0.5f;
     [SerializeField] public AnimationCurve slowdownCurve;
+    
+    // The HighScoreKey constant has been removed
+    // The HighScoreDisplay variable is no longer needed
+    // as we will update the TextMeshProUGUI directly.
 
-    private HighScoreDisplay _deathHighScoreDisplay;
     private bool hasDied = false;
-    private const string HighScoreKey = "HighScore";
 
     private void Awake()
     {
@@ -123,6 +128,10 @@ public class DeathManager : MonoBehaviour
 
     private IEnumerator DeathSequence()
     {
+
+        NotificationManager.Instance.ShowNotification(NotificationManager.NotificationType.Error, "Player is dead!");
+
+
         Time.timeScale = 0.3f;
 
         if (stuntManager != null && stuntManager.uiCanvas != null)
@@ -151,72 +160,74 @@ public class DeathManager : MonoBehaviour
                 int currentScore = StuntManager.Score;
                 Debug.Log($"DeathManager: Current score from StuntManager is {currentScore}");
 
-                int highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
-                Debug.Log($"DeathManager: High score from PlayerPrefs is {highScore}");
-
-                if (currentScore > highScore)
+                // Use the DataManager to update and save the high score
+                if (DataManager.Instance != null)
                 {
-                    PlayerPrefs.SetInt(HighScoreKey, currentScore);
-                    PlayerPrefs.Save();
-                    Debug.Log($"DeathManager: New high score set to {currentScore}");
+                    DataManager.Instance.UpdateHighScore(currentScore);
+                    CrazySDK.Game.HappyTime();
+                }
+                else
+                {
+                    Debug.LogError("DataManager instance not found! High score will not be saved.");
                 }
 
                 _finalScoreText.text = $"Score: {currentScore}";
                 yield return StartCoroutine(AnimateDeathText(_finalScoreText, 0.5f, 0f, 1f));
             }
 
-            _deathHighScoreDisplay = _deathCanvas.GetComponentInChildren<HighScoreDisplay>();
-            if (_deathHighScoreDisplay != null)
+            // The HighScoreDisplay logic has been replaced with a direct update.
+            if (_highScoreText != null && DataManager.Instance != null)
             {
-                yield return new WaitForSecondsRealtime(0.75f);
-                _deathHighScoreDisplay.DisplayWithPopUpAnimation(_highScoreText);
+                _highScoreText.text = $"High Score: {DataManager.Instance.highScore}";
+                yield return StartCoroutine(AnimateDeathText(_highScoreText, 0.5f, 0.75f, 1f)); // Add a small delay for this text
             }
-            else
+            else if (_highScoreText != null)
             {
-                Debug.LogError("HighScoreDisplay component not found! Make sure it's a child of the death canvas.");
+                Debug.LogError("DataManager instance not found! High score text will not be displayed.");
             }
         }
     }
 
-private IEnumerator SlowDownAndFadeSound()
-{
-    AudioSource[] audioSources = soundGameObject.GetComponentsInChildren<AudioSource>();
-    float timer = 0f;
-
-    float[] originalPitches = new float[audioSources.Length];
-    float[] originalVolumes = new float[audioSources.Length];
-
-    for (int i = 0; i < audioSources.Length; i++)
+    private IEnumerator SlowDownAndFadeSound()
     {
-        originalPitches[i] = audioSources[i].pitch;
-        originalVolumes[i] = audioSources[i].volume;
-    }
+        AudioSource[] audioSources = soundGameObject.GetComponentsInChildren<AudioSource>();
+        float timer = 0f;
 
-    while (timer < soundFadeDuration)
-    {
-        timer += Time.unscaledDeltaTime;
-        float t = timer / soundFadeDuration;
-        float curveValue = slowdownCurve.Evaluate(t); // Use the animation curve here
+        float[] originalPitches = new float[audioSources.Length];
+        float[] originalVolumes = new float[audioSources.Length];
 
         for (int i = 0; i < audioSources.Length; i++)
         {
-            audioSources[i].pitch = Mathf.Lerp(originalPitches[i], slowMoPitch, curveValue);
-            audioSources[i].volume = Mathf.Lerp(originalVolumes[i], slowMoVolume, curveValue);
+            originalPitches[i] = audioSources[i].pitch;
+            originalVolumes[i] = audioSources[i].volume;
         }
 
-        yield return null;
-    }
+        while (timer < soundFadeDuration)
+        {
+            timer += Time.unscaledDeltaTime;
+            float t = timer / soundFadeDuration;
+            float curveValue = slowdownCurve.Evaluate(t);
 
-    // Ensure the final values are set correctly at the end
-    for (int i = 0; i < audioSources.Length; i++)
-    {
-        audioSources[i].pitch = slowMoPitch;
-        audioSources[i].volume = slowMoVolume;
+            for (int i = 0; i < audioSources.Length; i++)
+            {
+                audioSources[i].pitch = Mathf.Lerp(originalPitches[i], slowMoPitch, curveValue);
+                audioSources[i].volume = Mathf.Lerp(originalVolumes[i], slowMoVolume, curveValue);
+            }
+
+            yield return null;
+        }
+
+        // Ensure the final values are set correctly at the end
+        for (int i = 0; i < audioSources.Length; i++)
+        {
+            audioSources[i].pitch = slowMoPitch;
+            audioSources[i].volume = slowMoVolume;
+        }
     }
-}
 
     public bool IsDead()
     {
+
         return hasDied;
     }
 
