@@ -7,12 +7,12 @@ public class DataManager : MonoBehaviour
     public static DataManager Instance;
 
     public int coins;
-    public int highScore; // New variable for high score
+    public int highScore;
     public List<string> ownedSprites = new List<string>();
     public string equippedSpriteName;
 
     private const string CoinsKey = "PlayerCoins";
-    private const string HighScoreKey = "HighScore"; // New key for high score
+    private const string HighScoreKey = "HighScore";
     private const string EquippedSpriteKey = "EquippedSprite";
     private const string OwnedSpritesKey = "OwnedSprites";
 
@@ -100,10 +100,6 @@ public class DataManager : MonoBehaviour
 
         Debug.Log("Player data has been reset.");
     }
-    
-    // This is the new, crucial part.
-    // It ensures data is saved when the application is closing, which is more reliable
-    // than relying on the editor's stop button.
     private void OnApplicationQuit()
     {
         SaveData();
