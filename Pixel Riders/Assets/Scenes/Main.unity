@@ -15451,11 +15451,14 @@ MonoBehaviour:
   spawnInterval: 1
   terrainLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
+  coinLimit: 25
+  destroyTimeBehindPlayer: 5
   forwardSpawnDistance: 20
   horizontalRange: 5
   verticalRange: 5
   raycastHeight: 10
+  minGroundSpawnHeight: 1
   airCoinChance: 0.5
   airMinHeight: 2
   airMaxHeight: 5
