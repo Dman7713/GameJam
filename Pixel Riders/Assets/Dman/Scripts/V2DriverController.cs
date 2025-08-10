@@ -22,8 +22,6 @@ public class DriverControllerV2 : MonoBehaviour
     [SerializeField] private float _motorTorque = 1000f;
     [Tooltip("Torque applied to the bike body for in-air rotation on PC.")]
     [SerializeField] private float _airRotationTorque = 150f;
-    [Tooltip("Damping applied to air rotation on PC.")]
-    [SerializeField] private float _airRotationDamping = 0.5f;
     
     [Header("Mobile Physics Settings")]
     [Tooltip("Target motor speed for forward movement on mobile.")]
@@ -137,17 +135,15 @@ public class DriverControllerV2 : MonoBehaviour
         
         float rotationInput = 0f;
         float currentAirRotationTorque = _airRotationTorque;
-        float currentAirRotationDamping = _airRotationDamping;
         
-        // --- Mobile Joystick Input ---
-        // Overrides keyboard input if the joystick is being used
+        // Check for mobile input first.
         if (MobileInputManager.RotationJoystickInput != 0f)
         {
             rotationInput = -MobileInputManager.RotationJoystickInput;
             currentAirRotationTorque = _mobileAirRotationTorque;
-            currentAirRotationDamping = _mobileAirRotationDamping;
+            // The damping logic is applied below, after checking for input.
         }
-        // --- Keyboard Input ---
+        // Then check for PC keyboard input.
         else if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
         {
             rotationInput = 1f;
@@ -163,8 +159,12 @@ public class DriverControllerV2 : MonoBehaviour
         }
         else
         {
-            // Apply damping when there is no active rotation input
-            _bikeRigidbody.angularVelocity *= (1f - currentAirRotationDamping);
+            // Only apply damping if it's mobile and no joystick input is detected.
+            // This prevents damping from affecting PC controls.
+            if (MobileInputManager.RotationJoystickInput == 0f)
+            {
+                 _bikeRigidbody.angularVelocity *= (1f - _mobileAirRotationDamping);
+            }
         }
     }
 
