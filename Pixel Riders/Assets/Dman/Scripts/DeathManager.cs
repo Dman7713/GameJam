@@ -39,9 +39,10 @@ public class DeathManager : MonoBehaviour
     // as we will update the TextMeshProUGUI directly.
 
     private bool hasDied = false;
-
     private void Awake()
     {
+        CrazySDK.Init(() => { /** initialization finished callback */ });
+
         if (Instance == null)
             Instance = this;
         else
