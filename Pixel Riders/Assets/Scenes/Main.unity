@@ -14874,10 +14874,9 @@ MonoBehaviour:
   _motorSpeed: 1500
   _motorTorque: 1000
   _airRotationTorque: 200
-  _airRotationDamping: 0
-  _mobileMotorSpeed: 10000
-  _mobileMotorTorque: 5000
-  _mobileAirRotationTorque: 1500
+  _mobileMotorSpeed: 1000
+  _mobileMotorTorque: 1000
+  _mobileAirRotationTorque: 150
   _mobileAirRotationDamping: 0.5
   _groundLayer:
     serializedVersion: 2
