@@ -1,6 +1,7 @@
-using UnityEngine;
 using System;
 using System.Linq;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(StuntManager))]
 public class DriverControllerV2 : MonoBehaviour
@@ -45,6 +46,8 @@ public class DriverControllerV2 : MonoBehaviour
     private bool _isGrounded;
     private bool _wasGroundedLastFrame;
 
+    private PrimaryInputSystem playerInput;
+
     // Public properties for easy access
     public bool IsDead { get { return _isDead; } }
     public bool IsGrounded => _isGrounded;
@@ -75,6 +78,11 @@ public class DriverControllerV2 : MonoBehaviour
         HandleAirRotation();
     }
 
+    private void Start() {
+        playerInput = new PrimaryInputSystem();
+        playerInput.Enable();
+    }
+
     private void UpdateGroundState()
     {
         _wasGroundedLastFrame = _isGrounded;
@@ -87,6 +95,8 @@ public class DriverControllerV2 : MonoBehaviour
         float currentMotorTorque = _motorTorque;
         float currentMotorSpeed = _motorSpeed;
 
+        Vector2 inputVector = playerInput.Player.Drive.ReadValue<Vector2>();
+
         // --- Mobile Input ---
         if (MobileInputManager.DriveInput != 0f)
         {
@@ -94,14 +104,8 @@ public class DriverControllerV2 : MonoBehaviour
             currentMotorTorque = _mobileMotorTorque;
             currentMotorSpeed = _mobileMotorSpeed;
         }
-        // --- Keyboard Input ---
-        else if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
-        {
-            driveInput = 1f;
-        }
-        else if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
-        {
-            driveInput = -1f;
+        else {
+            driveInput = inputVector.y;
         }
 
         // Apply motor speed to wheels if on the ground

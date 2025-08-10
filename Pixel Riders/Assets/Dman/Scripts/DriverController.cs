@@ -65,7 +65,10 @@ public class DriverController : MonoBehaviour
     [SerializeField] private AudioClip _reverseAudioClip;
     [SerializeField] private AudioClip _groundHitAudioClip;
     [SerializeField] private AudioClip _deathAudioClip;
-    
+
+
+    private PrimaryInputSystem playerInput;
+
 
     // State variables
     private bool _isGrounded;
@@ -119,6 +122,9 @@ public class DriverController : MonoBehaviour
         _bikeRigidbody.interpolation = RigidbodyInterpolation2D.Interpolate;
         _frontTireRB.interpolation = RigidbodyInterpolation2D.Interpolate;
         _backTireRB.interpolation = RigidbodyInterpolation2D.Interpolate;
+
+        playerInput = new PrimaryInputSystem();
+        playerInput.Enable();
         
         if (_stuntManager != null)
         {
@@ -162,33 +168,38 @@ public class DriverController : MonoBehaviour
     {
         float torque = _speed * Time.fixedDeltaTime;
 
-        if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
-        {
-            _frontTireRB.AddTorque(-torque);
-            _backTireRB.AddTorque(-torque);
-            
-            if (_audioSource.clip != _driveAudioClip)
-            {
-                PlayAudioClip(_driveAudioClip, true);
-            }
-        }
-        else if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
-        {
-            _frontTireRB.AddTorque(torque);
-            _backTireRB.AddTorque(torque);
+        Vector2 inputVector = playerInput.Player.Drive.ReadValue<Vector2>();
 
-            if (_audioSource.clip != _reverseAudioClip)
-            {
-                PlayAudioClip(_reverseAudioClip, true);
-            }
-        }
-        else
-        {
-            if (_audioSource.clip != _idleAudioClip)
-            {
-                PlayAudioClip(_idleAudioClip, true);
-            }
-        }
+        _frontTireRB.AddTorque(-torque * inputVector.y);
+        _backTireRB.AddTorque(-torque * inputVector.y);
+
+        //if ()
+        //{
+        //    _frontTireRB.AddTorque(-torque);
+        //    _backTireRB.AddTorque(-torque);
+            
+        //    if (_audioSource.clip != _driveAudioClip)
+        //    {
+        //        PlayAudioClip(_driveAudioClip, true);
+        //    }
+        //}
+        //else if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
+        //{
+        //    _frontTireRB.AddTorque(torque);
+        //    _backTireRB.AddTorque(torque);
+
+        //    if (_audioSource.clip != _reverseAudioClip)
+        //    {
+        //        PlayAudioClip(_reverseAudioClip, true);
+        //    }
+        //}
+        //else
+        //{
+        //    if (_audioSource.clip != _idleAudioClip)
+        //    {
+        //        PlayAudioClip(_idleAudioClip, true);
+        //    }
+        //}
     }
 
     private void HandleAirRotation()
@@ -196,15 +207,18 @@ public class DriverController : MonoBehaviour
         if (!_isGrounded)
         {
             float rotationTorque = _rotationSpeed * _airRotationMultiplier * Time.fixedDeltaTime;
+            Vector2 inputVector = playerInput.Player.Drive.ReadValue<Vector2>();
 
-            if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
-            {
-                _bikeRigidbody.AddTorque(rotationTorque);
-            }
-            else if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
-            {
-                _bikeRigidbody.AddTorque(-rotationTorque);
-            }
+            _bikeRigidbody.AddTorque(rotationTorque * -inputVector.x);
+
+            //if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
+            //{
+            //    _bikeRigidbody.AddTorque(rotationTorque);
+            //}
+            //else if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
+            //{
+            //    _bikeRigidbody.AddTorque(-rotationTorque);
+            //}
         }
     }
 
@@ -227,6 +241,7 @@ public class DriverController : MonoBehaviour
 
         _audioSource.Stop();
         _audioSourceGroundHit.Stop();
+        playerInput.Disable();
 
         if (_deathAudioClip != null)
         {
