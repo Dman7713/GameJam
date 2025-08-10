@@ -17,5 +17,9 @@ public static class MobileInputManager
     public static void SetRotationJoystickInput(float input)
     {
         RotationJoystickInput = input;
+        if (input != 0f)
+        {
+            Debug.Log($"MobileInputManager.RotationJoystickInput set to: {input}");
+        }
     }
 }

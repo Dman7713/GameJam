@@ -8224,7 +8224,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &925155547
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14277,8 +14277,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a807294624aa944497c0343c2a7d706, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  accelerateButton: {fileID: 32969981}
-  decelerateButton: {fileID: 55179793}
+  accelerateButton: {fileID: 32969980}
+  decelerateButton: {fileID: 55179794}
   rotationJoystick: {fileID: 1492813445}
 --- !u!1 &1314935490
 GameObject:
@@ -14874,12 +14874,17 @@ MonoBehaviour:
   _motorSpeed: 1500
   _motorTorque: 1000
   _airRotationTorque: 200
+  _airRotationDamping: 0
+  _mobileMotorSpeed: 10000
+  _mobileMotorTorque: 5000
+  _mobileAirRotationTorque: 1500
+  _mobileAirRotationDamping: 0.5
   _groundLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   _frontGroundCheck: {fileID: 795997258}
   _backGroundCheck: {fileID: 597259798}
-  _groundCheckRadius: 0.1
+  _groundCheckRadius: 0.5
 --- !u!1 &1407242514
 GameObject:
   m_ObjectHideFlags: 0

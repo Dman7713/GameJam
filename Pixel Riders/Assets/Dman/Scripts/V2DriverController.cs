@@ -15,13 +15,25 @@ public class DriverControllerV2 : MonoBehaviour
     [SerializeField] private WheelJoint2D _frontWheelJoint;
     [SerializeField] private WheelJoint2D _backWheelJoint;
     
-    [Header("Physics Settings")]
-    [Tooltip("Target motor speed for forward movement.")]
+    [Header("PC Physics Settings")]
+    [Tooltip("Target motor speed for forward movement on PC.")]
     [SerializeField] private float _motorSpeed = 1000f;
-    [Tooltip("Maximum motor torque. Adjust this to control acceleration.")]
+    [Tooltip("Maximum motor torque for PC. Adjust this to control acceleration.")]
     [SerializeField] private float _motorTorque = 1000f;
-    [Tooltip("Torque applied to the bike body for in-air rotation.")]
+    [Tooltip("Torque applied to the bike body for in-air rotation on PC.")]
     [SerializeField] private float _airRotationTorque = 150f;
+    [Tooltip("Damping applied to air rotation on PC.")]
+    [SerializeField] private float _airRotationDamping = 0.5f;
+    
+    [Header("Mobile Physics Settings")]
+    [Tooltip("Target motor speed for forward movement on mobile.")]
+    [SerializeField] private float _mobileMotorSpeed = 1000f;
+    [Tooltip("Maximum motor torque for mobile. Adjust this to control acceleration.")]
+    [SerializeField] private float _mobileMotorTorque = 1000f;
+    [Tooltip("Torque applied to the bike body for in-air rotation on mobile.")]
+    [SerializeField] private float _mobileAirRotationTorque = 150f;
+    [Tooltip("Damping applied to air rotation on mobile.")]
+    [SerializeField] private float _mobileAirRotationDamping = 0.5f;
 
     [Header("Ground Detection")]
     [SerializeField] private LayerMask _groundLayer;
@@ -35,11 +47,8 @@ public class DriverControllerV2 : MonoBehaviour
     private bool _isGrounded;
     private bool _wasGroundedLastFrame;
 
-    public bool IsDead {
-        get { return _isDead; }
-    }
-
     // Public properties for easy access
+    public bool IsDead { get { return _isDead; } }
     public bool IsGrounded => _isGrounded;
     public bool FrontWheelGrounded => Physics2D.OverlapCircle(_frontGroundCheck.position, _groundCheckRadius, _groundLayer);
     public bool BackWheelGrounded => Physics2D.OverlapCircle(_backGroundCheck.position, _groundCheckRadius, _groundLayer);
@@ -55,13 +64,12 @@ public class DriverControllerV2 : MonoBehaviour
 
         UpdateGroundState();
 
-        // Check for take-off and landing events
         if (_wasGroundedLastFrame && !_isGrounded)
         {
             OnTakeOff?.Invoke();
         }
         else if (!_wasGroundedLastFrame && _isGrounded)
-        {
+            {
             OnLanded?.Invoke();
         }
         
@@ -77,11 +85,19 @@ public class DriverControllerV2 : MonoBehaviour
 
     private void HandleMovement()
     {
-        // Get input for forward/backward movement
         float driveInput = 0f;
-        
-        // Check for keyboard input
-        if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
+        float currentMotorTorque = _motorTorque;
+        float currentMotorSpeed = _motorSpeed;
+
+        // --- Mobile Input ---
+        if (MobileInputManager.DriveInput != 0f)
+        {
+            driveInput = MobileInputManager.DriveInput;
+            currentMotorTorque = _mobileMotorTorque;
+            currentMotorSpeed = _mobileMotorSpeed;
+        }
+        // --- Keyboard Input ---
+        else if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
         {
             driveInput = 1f;
         }
@@ -89,23 +105,27 @@ public class DriverControllerV2 : MonoBehaviour
         {
             driveInput = -1f;
         }
-        
-        // Override with mobile input if it's not zero.
-        if (MobileInputManager.DriveInput != 0f)
-        {
-            driveInput = MobileInputManager.DriveInput;
-        }
 
         // Apply motor speed to wheels if on the ground
         if (_isGrounded)
         {
-            _motor.motorSpeed = -driveInput * _motorSpeed;
-            _frontWheelJoint.motor = _motor;
+            // Re-apply the high motor speed to both wheels
+            _motor.motorSpeed = -driveInput * currentMotorSpeed;
+            _motor.maxMotorTorque = currentMotorTorque;
+
+            // Create a new motor for the front wheel with a fraction of the torque
+            // This allows it to stabilize the bike without flipping it.
+            JointMotor2D frontMotor = new JointMotor2D
+            {
+                maxMotorTorque = currentMotorTorque * 0.2f,
+                motorSpeed = -driveInput * currentMotorSpeed
+            };
+
             _backWheelJoint.motor = _motor;
+            _frontWheelJoint.motor = frontMotor;
         }
         else
         {
-            // Stop the motor when in the air to prevent unwanted spinning
             _frontWheelJoint.motor = new JointMotor2D();
             _backWheelJoint.motor = new JointMotor2D();
         }
@@ -116,8 +136,19 @@ public class DriverControllerV2 : MonoBehaviour
         if (_isGrounded) return;
         
         float rotationInput = 0f;
-        // Check for keyboard input
-        if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
+        float currentAirRotationTorque = _airRotationTorque;
+        float currentAirRotationDamping = _airRotationDamping;
+        
+        // --- Mobile Joystick Input ---
+        // Overrides keyboard input if the joystick is being used
+        if (MobileInputManager.RotationJoystickInput != 0f)
+        {
+            rotationInput = -MobileInputManager.RotationJoystickInput;
+            currentAirRotationTorque = _mobileAirRotationTorque;
+            currentAirRotationDamping = _mobileAirRotationDamping;
+        }
+        // --- Keyboard Input ---
+        else if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
         {
             rotationInput = 1f;
         }
@@ -125,37 +156,30 @@ public class DriverControllerV2 : MonoBehaviour
         {
             rotationInput = -1f;
         }
-        
-        // Use the joystick input if it's not zero.
-        if (MobileInputManager.RotationJoystickInput != 0f)
-        {
-            // The joystick's horizontal value is already between -1 and 1
-            rotationInput = -MobileInputManager.RotationJoystickInput;
-        }
-        
+
         if (rotationInput != 0)
         {
-            _bikeRigidbody.AddTorque(rotationInput * _airRotationTorque * Time.fixedDeltaTime);
+            _bikeRigidbody.AddTorque(rotationInput * currentAirRotationTorque * Time.fixedDeltaTime);
+        }
+        else
+        {
+            // Apply damping when there is no active rotation input
+            _bikeRigidbody.angularVelocity *= (1f - currentAirRotationDamping);
         }
     }
 
-    // Public method for death handling
     public void HandleDeath()
     {
         if (_isDead) return;
 
         _isDead = true;
-        Debug.Log(IsDead);
-        // Stop all movement
         _frontWheelJoint.motor = new JointMotor2D();
         _backWheelJoint.motor = new JointMotor2D();
         _bikeRigidbody.angularVelocity = 0;
         
         OnDeath?.Invoke();
-        Debug.Log("Player is dead!");
     }
 
-    // --- Visualization for Ground Check ---
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {

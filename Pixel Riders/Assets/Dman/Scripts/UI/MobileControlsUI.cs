@@ -1,57 +1,59 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class MobileControlsUI : MonoBehaviour
 {
-    public EventTrigger accelerateButton;
-    public EventTrigger decelerateButton;
+    // Assign these in the Inspector
+    public Button accelerateButton;
+    public Button decelerateButton;
     public Joystick rotationJoystick;
 
     private void Awake()
     {
         Debug.Log("MobileControlsUI.Awake() called. Configuring button listeners.");
 
-        if (accelerateButton == null || decelerateButton == null)
-        {
-            Debug.LogError("Accelerate or Decelerate EventTrigger not assigned in the Inspector.");
-        }
-        else
-        {
-            // Configure Accelerate button events
-            AddTrigger(accelerateButton, EventTriggerType.PointerDown, (data) => MobileInputManager.SetDriveInput(1f));
-            AddTrigger(accelerateButton, EventTriggerType.PointerUp, (data) => MobileInputManager.SetDriveInput(0f));
-            
-            // Configure Decelerate button events
-            AddTrigger(decelerateButton, EventTriggerType.PointerDown, (data) => MobileInputManager.SetDriveInput(-1f));
-            AddTrigger(decelerateButton, EventTriggerType.PointerUp, (data) => MobileInputManager.SetDriveInput(0f));
-        }
-
-        if (rotationJoystick == null)
-        {
-            Debug.LogError("Rotation Joystick not assigned in the Inspector.");
-        }
+        // We use EventTriggers on the buttons to detect continuous holding
+        AddButtonListener(accelerateButton, 1f);
+        AddButtonListener(decelerateButton, -1f);
     }
     
     private void Update()
     {
         if (rotationJoystick != null)
         {
+            // Continuously update the joystick input
             float joystickValue = rotationJoystick.Horizontal;
             MobileInputManager.SetRotationJoystickInput(joystickValue);
-            if (joystickValue != 0f)
-            {
-                Debug.Log($"Joystick horizontal input: {joystickValue}");
-            }
         }
     }
 
-    private void AddTrigger(EventTrigger trigger, EventTriggerType type, System.Action<BaseEventData> action)
+    private void AddButtonListener(Button button, float inputValue)
     {
-        EventTrigger.Entry entry = new EventTrigger.Entry();
-        entry.eventID = type;
-        entry.callback.AddListener(new UnityAction<BaseEventData>(action));
-        trigger.triggers.Add(entry);
-        Debug.Log($"EventTrigger configured for {trigger.gameObject.name} with event type: {type}");
+        if (button == null)
+        {
+            Debug.LogError($"Button for input value {inputValue} not assigned in the Inspector.");
+            return;
+        }
+
+        EventTrigger trigger = button.GetComponent<EventTrigger>();
+        if (trigger == null)
+        {
+            trigger = button.gameObject.AddComponent<EventTrigger>();
+        }
+
+        // Add PointerDown event to set the input value
+        EventTrigger.Entry downEntry = new EventTrigger.Entry();
+        downEntry.eventID = EventTriggerType.PointerDown;
+        downEntry.callback.AddListener((data) => MobileInputManager.SetDriveInput(inputValue));
+        trigger.triggers.Add(downEntry);
+
+        // Add PointerUp event to set the input back to zero
+        EventTrigger.Entry upEntry = new EventTrigger.Entry();
+        upEntry.eventID = EventTriggerType.PointerUp;
+        upEntry.callback.AddListener((data) => MobileInputManager.SetDriveInput(0f));
+        trigger.triggers.Add(upEntry);
+        
+        Debug.Log($"EventTrigger configured for {button.gameObject.name} with input value: {inputValue}");
     }
 }
