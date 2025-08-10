@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Linq;
 
 [RequireComponent(typeof(StuntManager))]
 public class DriverControllerV2 : MonoBehaviour
@@ -70,14 +71,16 @@ public class DriverControllerV2 : MonoBehaviour
 
     private void UpdateGroundState()
     {
-        _isGrounded = FrontWheelGrounded || BackWheelGrounded;
         _wasGroundedLastFrame = _isGrounded;
+        _isGrounded = FrontWheelGrounded || BackWheelGrounded;
     }
 
     private void HandleMovement()
     {
         // Get input for forward/backward movement
         float driveInput = 0f;
+        
+        // Check for keyboard input
         if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
         {
             driveInput = 1f;
@@ -87,6 +90,12 @@ public class DriverControllerV2 : MonoBehaviour
             driveInput = -1f;
         }
         
+        // Override with mobile input if it's not zero.
+        if (MobileInputManager.DriveInput != 0f)
+        {
+            driveInput = MobileInputManager.DriveInput;
+        }
+
         // Apply motor speed to wheels if on the ground
         if (_isGrounded)
         {
@@ -107,6 +116,7 @@ public class DriverControllerV2 : MonoBehaviour
         if (_isGrounded) return;
         
         float rotationInput = 0f;
+        // Check for keyboard input
         if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
         {
             rotationInput = 1f;
@@ -114,6 +124,13 @@ public class DriverControllerV2 : MonoBehaviour
         else if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
         {
             rotationInput = -1f;
+        }
+        
+        // Use the joystick input if it's not zero.
+        if (MobileInputManager.RotationJoystickInput != 0f)
+        {
+            // The joystick's horizontal value is already between -1 and 1
+            rotationInput = -MobileInputManager.RotationJoystickInput;
         }
         
         if (rotationInput != 0)
