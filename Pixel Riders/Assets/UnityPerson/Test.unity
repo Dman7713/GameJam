@@ -1797,10 +1797,13 @@ MonoBehaviour:
   terrainLayer:
     serializedVersion: 2
     m_Bits: 0
+  coinLimit: 50
+  destroyTimeBehindPlayer: 5
   forwardSpawnDistance: 20
   horizontalRange: 5
   verticalRange: 5
   raycastHeight: 10
+  minGroundSpawnHeight: 1
   airCoinChance: 0.5
   airMinHeight: 2
   airMaxHeight: 5
@@ -7633,7 +7636,6 @@ GameObject:
   - component: {fileID: 886476077}
   - component: {fileID: 886476076}
   - component: {fileID: 886476075}
-  - component: {fileID: 886476074}
   - component: {fileID: 886476073}
   m_Layer: 0
   m_Name: Bike Controller
@@ -7871,7 +7873,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dc83b27c9f80ed4585645bd79da6af5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _driverController: {fileID: 886476074}
+  _driverController: {fileID: 0}
   _totalScoreText: {fileID: 2022922953}
   _stuntTextPrefab: {fileID: 8565786849556591773, guid: 8b995d93d89eabe4a8da9c5925cdb174, type: 3}
   _uiCanvas: {fileID: 291337542}
@@ -7880,30 +7882,6 @@ MonoBehaviour:
   _landingAngleTolerance: 15
   _cleanLandingMinSpeed: 20
   _perfectLandingMinSpeed: 46
---- !u!114 &886476074
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 886476067}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 83aadc34b04b9984087ccc60417822e6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _bikeRigidbody: {fileID: 886476069}
-  _frontWheelJoint: {fileID: 886476081}
-  _backWheelJoint: {fileID: 886476081}
-  _motorSpeed: 1000
-  _motorTorque: 1000
-  _airRotationTorque: 150
-  _groundLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  _frontGroundCheck: {fileID: 304721462}
-  _backGroundCheck: {fileID: 1851488099}
-  _groundCheckRadius: 0.1
 --- !u!114 &886476075
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13539,7 +13517,8 @@ Transform:
   m_LocalPosition: {x: 874.85175, y: 475.54492, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1643132012}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1224227519
@@ -13601,6 +13580,16 @@ MonoBehaviour:
   _deathText: {fileID: 611993235}
   _finalScoreText: {fileID: 1687806879}
   _highScoreText: {fileID: 121774450}
+  soundGameObject: {fileID: 0}
+  slowMoPitch: 0.5
+  slowMoVolume: 0.3
+  soundFadeDuration: 0.5
+  slowdownCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!233 &1224227522
 HingeJoint2D:
   m_ObjectHideFlags: 0
@@ -13775,6 +13764,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   coins: 0
+  highScore: 0
   ownedSprites: []
   equippedSpriteName: 
 --- !u!4 &1228675083
@@ -14794,12 +14784,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1643132009}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 25.35, y: 121.310005, z: 10}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -849.5018, y: -354.23492, z: 10}
   m_LocalScale: {x: 18.337048, y: 18.337048, z: 18.337048}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1220675370}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1652124747
 GameObject:
@@ -18450,7 +18440,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 1989673061}
   - {fileID: 1220675370}
-  - {fileID: 1643132012}
   - {fileID: 90453498}
   - {fileID: 418697750}
   - {fileID: 389970392}

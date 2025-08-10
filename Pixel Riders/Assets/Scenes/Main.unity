@@ -14176,13 +14176,13 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 2003064236}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
+      - m_Target: {fileID: 2003064240}
+        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+        m_MethodName: StartDelayedRestart
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -16554,7 +16554,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1726899441}
-  - component: {fileID: 1726899442}
   m_Layer: 0
   m_Name: SlowmotionFix
   m_TagString: Untagged
@@ -16577,18 +16576,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1726899442
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1726899440}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0553549b42625f64a9ed31df9bf32146, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1774075149
 GameObject:
   m_ObjectHideFlags: 0
@@ -17643,6 +17630,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2003064238}
   - component: {fileID: 2003064239}
+  - component: {fileID: 2003064240}
   m_Layer: 0
   m_Name: GAMEMANAGER
   m_TagString: Untagged
@@ -17679,6 +17667,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _pcControls: {fileID: 204611413}
   _mobileControls: {fileID: 1294079839}
+--- !u!114 &2003064240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2003064236}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f7a10b1e13a1d941b26121fcb16f815, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _gameOverCanvas: {fileID: 0}
+  restartDelay: 0.2
 --- !u!1 &2051436522
 GameObject:
   m_ObjectHideFlags: 0
