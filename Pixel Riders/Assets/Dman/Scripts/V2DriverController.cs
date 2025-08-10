@@ -134,37 +134,29 @@ public class DriverControllerV2 : MonoBehaviour
         if (_isGrounded) return;
         
         float rotationInput = 0f;
-        float currentAirRotationTorque = _airRotationTorque;
         
         // Check for mobile input first.
         if (MobileInputManager.RotationJoystickInput != 0f)
         {
             rotationInput = -MobileInputManager.RotationJoystickInput;
-            currentAirRotationTorque = _mobileAirRotationTorque;
-            // The damping logic is applied below, after checking for input.
+            _bikeRigidbody.AddTorque(rotationInput * _mobileAirRotationTorque * Time.fixedDeltaTime);
         }
         // Then check for PC keyboard input.
         else if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
         {
             rotationInput = 1f;
+            _bikeRigidbody.AddTorque(rotationInput * _airRotationTorque * Time.fixedDeltaTime);
         }
         else if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
         {
             rotationInput = -1f;
+            _bikeRigidbody.AddTorque(rotationInput * _airRotationTorque * Time.fixedDeltaTime);
         }
 
-        if (rotationInput != 0)
+        // Apply damping only when a mobile joystick was in use and has now been released.
+        if (rotationInput == 0f && MobileInputManager.RotationJoystickInput == 0f)
         {
-            _bikeRigidbody.AddTorque(rotationInput * currentAirRotationTorque * Time.fixedDeltaTime);
-        }
-        else
-        {
-            // Only apply damping if it's mobile and no joystick input is detected.
-            // This prevents damping from affecting PC controls.
-            if (MobileInputManager.RotationJoystickInput == 0f)
-            {
-                 _bikeRigidbody.angularVelocity *= (1f - _mobileAirRotationDamping);
-            }
+            _bikeRigidbody.angularVelocity *= (1f - _mobileAirRotationDamping);
         }
     }
 
