@@ -12,43 +12,41 @@ public class ArrowKeyImageSwitcher : MonoBehaviour
         Space,
     }
 
-    [Header("Key Settings")]
-    [EnumButtons]
-    public ArrowKey arrowKey = ArrowKey.Up;
-
-    [Header("Image Settings")]
-    public Image targetImage;
-    public Sprite normalSprite;
-    public Sprite heldSprite;
-
-    private (KeyCode, KeyCode) GetKeyCode()
-    {
-        switch (arrowKey)
-        {
-            case ArrowKey.Up: return (KeyCode.UpArrow, KeyCode.W);
-            case ArrowKey.Down: return ((KeyCode.DownArrow, KeyCode.S));
-            case ArrowKey.Left: return (KeyCode.LeftArrow, KeyCode.A);
-            case ArrowKey.Right: return (KeyCode.RightArrow, KeyCode.D);
-            case ArrowKey.Space: return (KeyCode.Space, KeyCode.LeftShift);
-            default: return (KeyCode.None, KeyCode.None);
-        }
+    [System.Serializable]
+    public class ImageData {
+        public float xThreshold;
+        public float yThreshold;
+        public Image sourceImage;
+        public Sprite normalSprite;
+        public Sprite heldSprite;
     }
 
-    private void Update()
-    {
-        if (targetImage == null || normalSprite == null || heldSprite == null)
-            return;
+    [Header("Image References")]
 
-        (KeyCode, KeyCode) selectedKey = GetKeyCode();
+    [SerializeField] private ImageData[] images;
 
 
-        if (Input.GetKey(selectedKey.Item1) || Input.GetKey(selectedKey.Item2))
-        {
-            targetImage.sprite = heldSprite;
-        }
-        else
-        {
-            targetImage.sprite = normalSprite;
+    private PrimaryInputSystem playerInput;
+
+    private void Start() {
+        playerInput = new PrimaryInputSystem();
+        playerInput.Enable();
+    }
+
+    private void Update() {
+        Vector2 inputVector = playerInput.Player.Drive.ReadValue<Vector2>();
+
+        foreach (var image in images) {
+
+            bool isHeld = false;
+
+            if (image.xThreshold != 0 && inputVector.x >= image.xThreshold && image.xThreshold >= 0) { isHeld = true; }
+            if (image.xThreshold != 0 && inputVector.x < image.xThreshold && image.xThreshold < 0) { isHeld = true; }
+            if (image.yThreshold != 0 && inputVector.y >= image.yThreshold && image.yThreshold >= 0) { isHeld = true; }
+            if (image.yThreshold != 0 && inputVector.y < image.yThreshold && image.yThreshold < 0) { isHeld = true; }
+
+            image.sourceImage.sprite = isHeld ? image.heldSprite : image.normalSprite;
+
         }
     }
 }
