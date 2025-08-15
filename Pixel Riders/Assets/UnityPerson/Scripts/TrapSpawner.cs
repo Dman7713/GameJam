@@ -4,11 +4,11 @@ public class TrapSpawner : MonoBehaviour {
     [SerializeField] private TrapData[] traps;            // The coin prefab
     [SerializeField] private float spawnInterval = 1f;
     [SerializeField] private float spawnChance;// How often to spawn coins
-    [SerializeField] private int coinsPerSpawn = 3;            // How many coins to spawn at once
-    [SerializeField] private float spawnRadius = 20f;          // Horizontal distance from player
-    [SerializeField] private float raycastHeight = 10f;        // How high above to raycast from
+    //[SerializeField] private int coinsPerSpawn = 3;            // How many coins to spawn at once
+    //[SerializeField] private float spawnRadius = 20f;          // Horizontal distance from player
+    //[SerializeField] private float raycastHeight = 10f;        // How high above to raycast from//
     [SerializeField] private LayerMask terrainLayer;           // The layer your Sprite Shape terrain is on
-    [SerializeField] private float minDistanceBehindPlayer = -5f; // No coins spawn behind this
+    //[SerializeField] private float minDistanceBehindPlayer = -5f; // No coins spawn behind this
 
     private Transform player;
 

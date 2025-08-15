@@ -42,7 +42,7 @@ public class NotificationManager : MonoBehaviour
     [SerializeField] private AudioClip notificationSound;
 
     private RectTransform panelRect;
-    private bool isAnimating = false;
+    //private bool isAnimating = false;
     private Color originalTextColor; // Store the target color for the text
 
     private void Awake()

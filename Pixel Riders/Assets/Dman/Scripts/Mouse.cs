@@ -13,7 +13,7 @@ public class AllInOneCursorManager : MonoBehaviour
         SetDefaultCursor();
 
         // Automatically hook into all existing buttons
-        Button[] buttons = FindObjectsOfType<Button>(true); // true = include inactive
+        Button[] buttons = FindObjectsByType<Button>(FindObjectsSortMode.None); // true = include inactive
         foreach (Button button in buttons)
         {
             AddHoverEvents(button.gameObject);
