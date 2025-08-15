@@ -115,7 +115,7 @@ public class NotificationManager : MonoBehaviour
         }
 
         notificationPanel.SetActive(true);
-        isAnimating = true;
+        //isAnimating = true;
 
         // Ensure the panel is transparent by setting its alpha to 0.
         Color panelColor = panelImage.color;
@@ -159,7 +159,7 @@ public class NotificationManager : MonoBehaviour
         // Reset positions and hide the panel
         panelRect.anchoredPosition = new Vector2(panelRect.anchoredPosition.x, startYPosition);
         notificationPanel.SetActive(false);
-        isAnimating = false;
+        //isAnimating = false;
     }
 }
 
