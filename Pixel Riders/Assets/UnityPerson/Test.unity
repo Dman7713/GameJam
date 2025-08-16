@@ -1236,9 +1236,8 @@ GameObject:
   - component: {fileID: 251218542}
   - component: {fileID: 251218545}
   - component: {fileID: 251218544}
-  - component: {fileID: 251218543}
   m_Layer: 5
-  m_Name: Image (3)
+  m_Name: Down
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1263,22 +1262,6 @@ RectTransform:
   m_AnchoredPosition: {x: -237.41193, y: 115.06}
   m_SizeDelta: {x: 30.69397, y: 19.509003}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &251218543
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 251218541}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d85dc3bce22da34b98645a8090702f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  arrowKey: 1
-  targetImage: {fileID: 251218544}
-  normalSprite: {fileID: -8089629048124380239, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
-  heldSprite: {fileID: 5453982617577217525, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
 --- !u!114 &251218544
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1465,6 +1448,7 @@ GameObject:
   - component: {fileID: 291337542}
   - component: {fileID: 291337544}
   - component: {fileID: 291337543}
+  - component: {fileID: 291337545}
   m_Layer: 5
   m_Name: ScoreCanvas
   m_TagString: Untagged
@@ -1561,6 +1545,39 @@ MonoBehaviour:
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
   m_PresetInfoIsWorld: 0
+--- !u!114 &291337545
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 291337540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d85dc3bce22da34b98645a8090702f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  images:
+  - xThreshold: -0.6
+    yThreshold: 0
+    sourceImage: {fileID: 1371821400}
+    normalSprite: {fileID: 1605003931333866638, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
+    heldSprite: {fileID: -8104734162608199072, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
+  - xThreshold: 0
+    yThreshold: 0.6
+    sourceImage: {fileID: 1826489443}
+    normalSprite: {fileID: 5431757021121182412, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
+    heldSprite: {fileID: -5010305134802759572, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
+  - xThreshold: 0
+    yThreshold: -0.6
+    sourceImage: {fileID: 251218544}
+    normalSprite: {fileID: -8089629048124380239, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
+    heldSprite: {fileID: 5453982617577217525, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
+  - xThreshold: 0.6
+    yThreshold: 0
+    sourceImage: {fileID: 621101415}
+    normalSprite: {fileID: 1605003931333866638, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
+    heldSprite: {fileID: -8104734162608199072, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
 --- !u!1 &298166448
 GameObject:
   m_ObjectHideFlags: 0
@@ -1639,10 +1656,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 454ccaed67adf954088697a8a6518180, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  meteorPrefab: {fileID: 1118020191029471674, guid: 347dd3f0a50817e41b5b5e752a905aa3, type: 3}
-  playerTransform: {fileID: 886476068}
-  spawnRadius: 10
-  spawnInterval: 1
 --- !u!4 &299789100
 Transform:
   m_ObjectHideFlags: 0
@@ -1843,13 +1856,9 @@ MonoBehaviour:
   traps: []
   spawnInterval: 1
   spawnChance: 0
-  coinsPerSpawn: 3
-  spawnRadius: 20
-  raycastHeight: 10
   terrainLayer:
     serializedVersion: 2
     m_Bits: 64
-  minDistanceBehindPlayer: -5
 --- !u!1 &389970387
 GameObject:
   m_ObjectHideFlags: 0
@@ -2509,9 +2518,8 @@ GameObject:
   - component: {fileID: 621101413}
   - component: {fileID: 621101416}
   - component: {fileID: 621101415}
-  - component: {fileID: 621101414}
   m_Layer: 5
-  m_Name: Image (2)
+  m_Name: Right
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2536,22 +2544,6 @@ RectTransform:
   m_AnchoredPosition: {x: -157.20001, y: 137}
   m_SizeDelta: {x: 76.02234, y: 39.3396}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &621101414
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 621101412}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d85dc3bce22da34b98645a8090702f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  arrowKey: 3
-  targetImage: {fileID: 621101415}
-  normalSprite: {fileID: 1605003931333866638, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
-  heldSprite: {fileID: -8104734162608199072, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
 --- !u!114 &621101415
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14118,9 +14110,8 @@ GameObject:
   - component: {fileID: 1371821398}
   - component: {fileID: 1371821401}
   - component: {fileID: 1371821400}
-  - component: {fileID: 1371821399}
   m_Layer: 5
-  m_Name: Image
+  m_Name: Left
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14145,22 +14136,6 @@ RectTransform:
   m_AnchoredPosition: {x: -319, y: 137}
   m_SizeDelta: {x: 36.50421, y: 18.890015}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1371821399
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1371821397}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d85dc3bce22da34b98645a8090702f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  arrowKey: 2
-  targetImage: {fileID: 1371821400}
-  normalSprite: {fileID: 1605003931333866638, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
-  heldSprite: {fileID: -8104734162608199072, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
 --- !u!114 &1371821400
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15601,9 +15576,8 @@ GameObject:
   - component: {fileID: 1826489441}
   - component: {fileID: 1826489444}
   - component: {fileID: 1826489443}
-  - component: {fileID: 1826489442}
   m_Layer: 5
-  m_Name: Image (1)
+  m_Name: Up
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15628,22 +15602,6 @@ RectTransform:
   m_AnchoredPosition: {x: -237.41205, y: 165.742}
   m_SizeDelta: {x: 30.69519, y: 20.910004}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1826489442
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1826489440}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d85dc3bce22da34b98645a8090702f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  arrowKey: 0
-  targetImage: {fileID: 1826489443}
-  normalSprite: {fileID: 5431757021121182412, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
-  heldSprite: {fileID: -5010305134802759572, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
 --- !u!114 &1826489443
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17895,13 +17853,9 @@ MonoBehaviour:
     occupiedRadius: 0
   spawnInterval: 1
   spawnChance: 0
-  coinsPerSpawn: 3
-  spawnRadius: 20
-  raycastHeight: 10
   terrainLayer:
     serializedVersion: 2
     m_Bits: 0
-  minDistanceBehindPlayer: -5
 --- !u!1001 &1995345557
 PrefabInstance:
   m_ObjectHideFlags: 0
