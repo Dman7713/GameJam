@@ -532,7 +532,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &117735963
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -815,23 +815,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   images:
-  - xThreshold: -1
-    yThreshold: 0.1
+  - xThreshold: -0.6
+    yThreshold: 0
     sourceImage: {fileID: 1133601935}
     normalSprite: {fileID: 1605003931333866638, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
     heldSprite: {fileID: -8104734162608199072, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
-  - xThreshold: 0.1
-    yThreshold: 1
+  - xThreshold: 0
+    yThreshold: 0.6
     sourceImage: {fileID: 1438222769}
     normalSprite: {fileID: 5431757021121182412, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
     heldSprite: {fileID: -5010305134802759572, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
-  - xThreshold: 0.1
-    yThreshold: -1
+  - xThreshold: 0
+    yThreshold: -0.6
     sourceImage: {fileID: 824460976}
     normalSprite: {fileID: -8089629048124380239, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
     heldSprite: {fileID: 5453982617577217525, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
-  - xThreshold: 1
-    yThreshold: 0.1
+  - xThreshold: 0.6
+    yThreshold: 0
     sourceImage: {fileID: 1407242516}
     normalSprite: {fileID: 1605003931333866638, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
     heldSprite: {fileID: -8104734162608199072, guid: b15a2b5ab4bf8694aa50c0dce4b4f56e, type: 3}
@@ -1140,7 +1140,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &387340042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3108,7 +3108,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &972243698
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4894,7 +4894,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1538058493
 MonoBehaviour:
   m_ObjectHideFlags: 0
